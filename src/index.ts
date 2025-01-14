@@ -16,12 +16,12 @@ const pushChanges = async (): Promise<void> => {
   try {
     await git.push('origin', 'main', ['--follow-tags'])
     write({
-      message: 'Pushed changes to remote repository.\n',
+      message: 'Pushed changes to remote repository.',
       variant: 'success'
     })
   } catch (error: unknown) {
     write({
-      message: 'Failed to push changes to remote repository.\n',
+      message: 'Failed to push changes to remote repository.',
       variant: 'error'
     })
     write({
@@ -95,24 +95,9 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
   }
 }
 
-/**
- * Publishes the package to the registry using the configuration from the publish-config.json.
- *
- * This function constructs and executes the `npm publish` command based on the configuration options.
- * If Two-Factor Authentication (2FA) is required, an OTP can be provided as an argument.
- *
- * @param {string} [otp] - The one-time password (OTP) from the authenticator app, required if 2FA is enabled on your npm account.
- * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
- *
- * @example
- * // Publishing with OTP
- * publishPackage("123456")
- *   .then(() => console.log("Package published successfully"))
- *   .catch(err => console.error("Failed to publish package", err));
- */
 const publishPackage = (otp?: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const { command, registry, options } = config.publish
+    const { command, registry } = config.publish
     const publishCommand = `${command} --registry ${registry}`
 
     // Add OTP to command if available
@@ -120,13 +105,7 @@ const publishPackage = (otp?: string): Promise<void> => {
       ? `${publishCommand} --otp=${otp}`
       : publishCommand
 
-    // Add additional options to the command
-    const commandWithOptions = Object.keys(options).reduce((cmd, key) => {
-      const optionValue = options[key]
-      return optionValue ? `${cmd} --${key}=${optionValue}` : cmd
-    }, commandWithOtp)
-
-    exec(commandWithOptions, (error) => {
+    exec(commandWithOtp, (error) => {
       if (error) {
         write({
           message: 'Failed to publish package',
