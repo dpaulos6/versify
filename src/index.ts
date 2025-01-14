@@ -97,13 +97,17 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
 
 const publishPackage = (otp?: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const { command, registry } = config.publish
-    const publishCommand = `${command} --registry ${registry}`
+    const { publish } = config
 
-    // Add OTP to command if available
-    const commandWithOtp = otp
-      ? `${publishCommand} --otp=${otp}`
-      : publishCommand
+    if (!publish) {
+      write({
+        message: 'Publishing is disabled in the configuration file.',
+        variant: 'warning'
+      })
+      return resolve()
+    }
+
+    const commandWithOtp = `npm publish --otp=${otp}`
 
     exec(commandWithOtp, (error) => {
       if (error) {
