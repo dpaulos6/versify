@@ -30,23 +30,36 @@ const updateVersionInPackageJson = (newVersion: string): void => {
 
 // Function to commit and tag the new version
 const commitAndTagRelease = async (newVersion: string): Promise<void> => {
-  await git.add('./*')
+  await git
+    .add('./*')
     .commit(`chore: release version ${newVersion}`)
     .tag([newVersion], (err) => {
       if (err) {
-        console.error('Error tagging release:', err);
-        process.exit(1);
+        console.error('Error tagging release:', err)
+        process.exit(1)
       }
-      console.log(`Release ${newVersion} tagged successfully.`);
-    });
-};
+      console.log(`Release ${newVersion} tagged successfully.`)
+    })
+}
 
-// Main function to automate versioning
+// Function to push the changes and tags to the remote repository
+const pushChanges = async (): Promise<void> => {
+  await git.push('origin', 'main', ['--follow-tags'])
+  console.log('Changes and tags pushed to remote.')
+}
+
+// Main function to automate versioning with optional push
 export const automateVersioning = async (
-  bumpType: 'major' | 'minor' | 'patch'
+  bumpType: 'major' | 'minor' | 'patch',
+  push = false // Default to false, push only if true
 ): Promise<void> => {
   const newVersion = bumpVersion(bumpType)
   updateVersionInPackageJson(newVersion)
   await commitAndTagRelease(newVersion)
+
+  if (push) {
+    await pushChanges()
+  }
+
   console.log(`Version bumped to ${newVersion} and tagged in Git.`)
 }
