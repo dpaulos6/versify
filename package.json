@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/autover",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "cli": "node dist/cli.js"
+    "cli": "node dist/cli.js",
+    "preinstall": "tsc"
   },
   "bin": {
     "autover": "bin/autover"

@@ -1,6 +1,10 @@
 # Versioning Automation CLI
 
-A Command Line Interface (CLI) tool for automating version bumps and Git tagging in your projects. This tool bumps your version based on Semantic Versioning (SemVer) principles and commits and tags the new version in Git.
+A Command Line Interface (CLI) tool for automating version bumps, Git tagging, and package publishing in your projects. This tool bumps your version based on Semantic Versioning (SemVer) principles, commits and tags the new version in Git, and optionally publishes the package.
+
+## Warning
+
+JSR is still a work in progress, it will not work if you try to use JSR.
 
 ## Installation
 
@@ -12,14 +16,14 @@ npm install -g @dpaulos6/autover
 
 ## Usage
 
-After installing, you can use the `autover` command to bump the version of your project and tag the release in Git.
+After installing, you can use the `autover` command to bump the version of your project, tag the release in Git, and optionally publish the package.
 
 ### Bump the version
 
 To bump the version, run the following command:
 
 ```bash
-autover bump <type> # add --push to automatically push changes
+autover bump <type>
 ```
 
 Where `<type>` can be one of the following:
@@ -41,16 +45,10 @@ This will:
 1. Read the current version from `package.json`.
 2. Increment the version based on the specified type (major, minor, or patch).
 3. Update `package.json` with the new version.
-4. Commit all changes to Git with a message `chore: release version <new_version`>`.
+4. Commit all changes to Git with a message `chore: release version <new_version>`.
 5. Tag the release in Git with the new version.
-
-### Example Error
-
-If an invalid version type is provided, you will see an error message like this:
-
-```bash
-Error: Please provide a valid bump type (major, minor, patch).
-```
+6. Optionally push changes to the remote repository.
+7. Optionally publish the package if configured.
 
 ### Commit and Tagging
 
@@ -79,12 +77,55 @@ The Git tag will be applied as:
 You can manually push changes and tags by running:
 
 ```bash
-git push && git push --tags # changes + all tags
-
-# or
-
-git push && git push origin <tag-name> # changes + individual tag (eg. 1.1.2)
+git push && git push --tags
 ```
+
+### Package Publishing
+
+If your project is a package that needs to be published, you can configure the tool to automatically publish the package after versioning.
+
+### Configuration
+
+When you run the tool for the first time, you will be prompted to save your configuration settings in a configuration file. The settings include:
+
+1. Is this project a package that needs to be published?
+2. Where would you like to publish? (e.g., npm, jsr)
+3. Do you want to automatically publish the package after versioning?
+4. Do you want to automatically push changes after versioning?
+
+The configuration will be saved in a `config.json` file in your project directory.
+
+### Example Configuration File
+
+The base configuration from `file.ts` is as follows:
+
+```json
+{
+  "publishConfig": {
+    "isPackage": true,
+    "publishTo": "npm",
+    "shouldPush": true,
+    "shouldPublish": true,
+    "commands": {
+      "npm": {
+        "publish": "npm publish",
+        "options": ["--otp"]
+      },
+      "jsr": {
+        "publish": "jsr publish",
+        "options": ["--username", "--password"]
+      }
+    }
+  }
+}
+```
+
+### Package Publishing Commands
+
+The tool supports publishing to npm and jsr with the following commands:
+
+- [`npm publish`](command:_github.copilot.openSymbolFromReferences?%5B%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22c%3A%5C%5Ccoding%5C%5Cautover%5C%5Csrc%5C%5Cutils%5C%5Cfile.ts%22%2C%22_sep%22%3A1%2C%22external%22%3A%22file%3A%2F%2F%2Fc%253A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22path%22%3A%22%2Fc%3A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22scheme%22%3A%22file%22%7D%2C%7B%22line%22%3A67%2C%22character%22%3A10%7D%5D "src/utils/file.ts") with `--otp` option for One-Time Password (OTP).
+- [`jsr publish`](command:_github.copilot.openSymbolFromReferences?%5B%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22c%3A%5C%5Ccoding%5C%5Cautover%5C%5Csrc%5C%5Cutils%5C%5Cfile.ts%22%2C%22_sep%22%3A1%2C%22external%22%3A%22file%3A%2F%2F%2Fc%253A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22path%22%3A%22%2Fc%3A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22scheme%22%3A%22file%22%7D%2C%7B%22line%22%3A67%2C%22character%22%3A10%7D%5D "src/utils/file.ts") with `--username` and `--password` options for credentials.
 
 ## License
 
