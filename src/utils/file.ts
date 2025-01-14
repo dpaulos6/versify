@@ -1,14 +1,16 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { write } from './log'
+import type { Config } from '../types/config'
 
 const configFilePath = path.join(__dirname, '..', './config.json')
 
 /**
- * Reads the configuration file. If the file does not exist, it creates a default configuration file.
- * @returns {Record<string, any>} The configuration object.
+ * Reads the configuration file and parses it into a JavaScript object.
+ * If the configuration file does not exist, it creates a default configuration file.
+ * @returns {Config | undefined} The parsed configuration object, or undefined if an error occurred.
  */
-export const getConfig = (): Record<string, any> => {
+export const getConfig = (): Config | undefined => {
   if (fs.existsSync(configFilePath)) {
     try {
       const config = fs.readFileSync(configFilePath, 'utf-8')
@@ -21,28 +23,25 @@ export const getConfig = (): Record<string, any> => {
     }
   } else {
     write({
-      message: 'Config file does not exist. Creating default config file.',
+      message: 'Config file does not exist. Creating a config file.',
       variant: 'warning'
     })
-    const defaultConfig = createDefaultConfig()
-    saveConfig(defaultConfig)
-    return defaultConfig
+    createDefaultConfig()
   }
-  return {}
+  return undefined
 }
 
 /**
  * Saves the configuration object to the configuration file.
- * @param {Record<string, any>} config - The configuration object to save.
+ * @param {Config} config - The configuration object to save.
  * @returns {void}
  */
-export const saveConfig = (config: Record<string, any>): void => {
+export const saveConfig = (config: Config): void => {
   try {
     const directory = path.dirname(configFilePath)
     if (!fs.existsSync(directory)) {
       fs.mkdirSync(directory, { recursive: true })
     }
-
     fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2))
   } catch (error) {
     write({
@@ -56,23 +55,10 @@ export const saveConfig = (config: Record<string, any>): void => {
  * Creates a default configuration object.
  * @returns {Record<string, any>} The default configuration object.
  */
-const createDefaultConfig = (): Record<string, any> => {
-  return {
-    publishConfig: {
-      isPackage: true,
-      publishTo: 'npm',
-      shouldPush: true,
-      shouldPublish: true,
-      commands: {
-        npm: {
-          publish: 'npm publish',
-          options: ['--otp']
-        },
-        jsr: {
-          publish: 'jsr publish',
-          options: ['--username', '--password']
-        }
-      }
-    }
+const createDefaultConfig = (): Config => {
+  const configPath = path.resolve(__dirname, 'config.json')
+  if (!fs.existsSync(configPath)) {
+    fs.writeFileSync(configPath, JSON.stringify({}, null, 2))
   }
+  return undefined as unknown as Config
 }

@@ -72,31 +72,6 @@ const askPublishLocation = async (): Promise<string> => {
   return publishTo
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-const askCredentials = async (publishTo: string): Promise<any> => {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  let credentials: Record<string, any> = {}
-
-  if (publishTo === 'npm') {
-    credentials.otp = await askOtp()
-  } else if (publishTo === 'jsr') {
-    credentials = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'username',
-        message: 'Enter your JSR username:'
-      },
-      {
-        type: 'password',
-        name: 'password',
-        message: 'Enter your JSR password:'
-      }
-    ])
-  }
-
-  return credentials
-}
-
 const storePublishConfig = (
   isPackage?: boolean,
   publishTo?: string,
@@ -104,21 +79,17 @@ const storePublishConfig = (
   shouldPublish?: boolean
 ): void => {
   const config = getConfig()
-  config.publishConfig = {
-    isPackage,
-    publishTo,
-    shouldPush,
-    shouldPublish,
-    commands: {
-      npm: {
-        publish: 'npm publish',
-        options: ['--otp']
-      },
-      jsr: {
-        publish: 'jsr publish',
-        options: ['--username', '--password']
-      }
-    }
+  if (config === undefined) {
+    return
+  }
+
+  config.isPackage = isPackage ?? config.isPackage
+  config.shouldPush = shouldPush ?? config.shouldPush
+  config.shouldPublish = shouldPublish ?? config.shouldPublish
+  config.publish = {
+    name: publishTo ?? config.publish.name,
+    command: publishTo === 'npm' ? 'npm publish' : 'jsr publish',
+    options: publishTo === 'npm' ? ['--otp'] : []
   }
   saveConfig(config)
 }
@@ -236,35 +207,36 @@ export const automateVersioning = async (
   bumpType: 'major' | 'minor' | 'patch'
 ): Promise<string> => {
   await ensureConfig()
-  const config = getConfig().publishConfig
-  const { isPackage, publishTo, shouldPush, shouldPublish } = config
+  const config = getConfig()
+  if (config !== undefined) {
+    const { isPackage, shouldPush, shouldPublish } = config
 
-  const spinner = ora('Automating versioning...').start()
+    const spinner = ora('Automating versioning...').start()
 
-  const newVersion = bumpVersion(bumpType)
-  updateVersionInPackageJson(newVersion)
-  await commitAndTagRelease(newVersion)
+    const newVersion = bumpVersion(bumpType)
+    updateVersionInPackageJson(newVersion)
+    await commitAndTagRelease(newVersion)
 
-  spinner.succeed('Versioning complete')
+    spinner.succeed('Versioning complete')
 
-  if (shouldPush) {
-    await pushChanges()
+    if (shouldPush) {
+      await pushChanges()
+    }
+
+    if (isPackage) {
+      await handlePackagePublishing(shouldPublish)
+    }
+
+    return newVersion
   }
-
-  if (isPackage) {
-    await handlePackagePublishing(publishTo, shouldPublish)
-  }
-
-  return newVersion
+  process.exit(1)
 }
 
 const ensureConfig = async (): Promise<void> => {
-  const config = getConfig().publishConfig
+  const config = getConfig()
   if (
-    !config.isPackage ||
-    !config.publishTo ||
-    !config.shouldPush ||
-    !config.shouldPublish
+    config !== undefined &&
+    (!config.isPackage || !config.shouldPush || !config.shouldPublish)
   ) {
     const isPackage = await askProjectType()
     const publishTo = isPackage ? await askPublishLocation() : ''
@@ -276,31 +248,26 @@ const ensureConfig = async (): Promise<void> => {
 }
 
 const handlePackagePublishing = async (
-  publishTo: string,
   shouldPublish: boolean
 ): Promise<void> => {
-  const config = getConfig().publishConfig
-  const credentials = await askCredentials(publishTo)
+  const config = getConfig()
 
-  const command = (() => {
-    const publishCommand = config.commands[publishTo].publish
-    const options = config.commands[publishTo].options
-    let commandString = publishCommand
+  if (config !== undefined) {
+    const command = (async () => {
+      const publishCommand = config.publish.command
+      const options = config.publish.options ?? []
+      let commandString = publishCommand
 
-    for (const option of options) {
-      if (option === '--otp') {
-        commandString += ` ${option}=${credentials.otp}`
-      } else if (option === '--username') {
-        commandString += ` ${option}=${credentials.username}`
-      } else if (option === '--password') {
-        commandString += ` ${option}=${credentials.password}`
+      if (options[0] === '--otp') {
+        const otp = await askOtp()
+        commandString += ` ${options[0]}=${otp}`
       }
+
+      return commandString
+    })()
+
+    if (shouldPublish) {
+      await publishPackage(await command)
     }
-
-    return commandString
-  })()
-
-  if (shouldPublish) {
-    await publishPackage(command)
   }
 }

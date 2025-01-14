@@ -1,0 +1,16 @@
+{
+  "npm": {
+    "publish": {
+      "name": "npm",
+      "command": "npm publish",
+      "options": ["--otp"]
+    }
+  },
+  "jsr": {
+    "publish": {
+      "name": "jsr",
+      "command": "jsr publish",
+      "options": []
+    }
+  }
+}
