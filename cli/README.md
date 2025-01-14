@@ -76,6 +76,23 @@ The Git tag will be applied as:
 1.1.2
 ```
 
+Note that you will have to push both the changes and the git tag. To do so, run:
+
+```bash
+git push --follow-tags
+```
+
+Alternatively, you can push changes and tags individually with:
+
+```bash
+```bash 
+git push && git push --tags # changes + all tags
+
+# or
+
+git push && git push origin <tag-name> # changes + single tag (eg. 1.1.2)
+```
+
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](../LICENSE) for details.

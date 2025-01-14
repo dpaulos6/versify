@@ -1,0 +1,52 @@
+{
+	"name": "@dpaulos6/autover",
+	"version": "1.1.2",
+	"description": "A CLI tool for automating version bumps",
+	"main": "index.js",
+	"author": {
+		"name": "dpaulos6",
+		"email": "dpaulos6@outlook.com",
+		"url": "https://dpaulos6.com/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/dpaulos6/autover"
+	},
+	"homepage": "https://github.com/dpaulos6/autover#readme",
+	"bugs": {
+		"url": "https://github.com/dpaulos6/autover/issues"
+	},
+	"scripts": {
+		"build": "tsc",
+		"cli": "node dist/cli.js",
+		"postinstall": "tsc"
+	},
+	"bin": {
+		"autover": "./bin/autover.js"
+	},
+	"keywords": [
+		"cli",
+		"versioning",
+		"semver",
+		"bump",
+		"automation",
+		"git",
+		"release",
+		"npm"
+	],
+	"license": "MIT",
+	"contributors": ["dpaulos6"],
+	"dependencies": {
+		"@types/node": "^22.10.5",
+		"@types/semver": "^7.5.8",
+		"commander": "^13.0.0",
+		"semver": "^7.6.3",
+		"simple-git": "^3.27.0",
+		"typescript": "^5.7.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"ultracite": "4.1.15"
+	},
+	"packageManager": "pnpm@9.15.4"
+}
