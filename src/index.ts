@@ -81,13 +81,21 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
  */
 const publishPackage = (): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const publishCommand = config.publishCommand || 'npm publish'
-    const registry = config.registry || 'https://registry.npmjs.org'
+    if (!config.publish.enabled) {
+      console.log('Publish is disabled in the configuration.')
+      return resolve() // Skip publishing if disabled
+    }
 
-    // Set the registry if provided
-    const fullPublishCommand = `${publishCommand} --registry ${registry}`
+    const { command, registry, options } = config.publish
+    const publishCommand = `${command} --registry ${registry}`
 
-    exec(fullPublishCommand, (error, stdout, stderr) => {
+    // Add additional options to the command
+    const commandWithOptions = Object.keys(options).reduce((cmd, key) => {
+      const optionValue = options[key]
+      return optionValue ? `${cmd} --${key}=${optionValue}` : cmd
+    }, publishCommand)
+
+    exec(commandWithOptions, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error publishing package: ${stderr}`)
         return reject(error)
