@@ -237,7 +237,6 @@ export const automateVersioning = async (
 ): Promise<string> => {
   await ensureConfig()
   const config = getConfig().publishConfig
-  console.log(config)
   const { isPackage, publishTo, shouldPush, shouldPublish } = config
 
   const spinner = ora('Automating versioning...').start()
@@ -283,8 +282,6 @@ const handlePackagePublishing = async (
   const config = getConfig().publishConfig
   const credentials = await askCredentials(publishTo)
   storePublishConfig(undefined, undefined, undefined, undefined, credentials)
-
-  console.log(credentials)
 
   const command =
     publishTo === 'npm'
