@@ -281,7 +281,7 @@ const handlePackagePublishing = async (
 ): Promise<void> => {
   const config = getConfig().publishConfig
   const credentials = await askCredentials(publishTo)
-  storePublishConfig(undefined, undefined, undefined, undefined, credentials)
+  storePublishConfig(credentials)
 
   const command =
     publishTo === 'npm'
