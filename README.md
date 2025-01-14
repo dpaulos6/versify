@@ -7,7 +7,7 @@ A Command Line Interface (CLI) tool for automating version bumps and Git tagging
 You can install the tool globally via npm:
 
 ```bash
-npm install -g versioning-automation
+npm install -g @dpaulos6/autover
 ```
 
 ## Usage
