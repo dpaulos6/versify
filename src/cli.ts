@@ -1,7 +1,6 @@
 import { program } from 'commander'
-import inquirer from 'inquirer'
 import { automateVersioning } from './index'
-import { getConfig, saveConfig } from './utils/file' // Import file utility functions
+import {} from './utils/file' // Import file utility functions
 import { write } from './utils/log'
 
 program.name('autover').usage('<command> [options]').version('2.0.0')
@@ -9,8 +8,6 @@ program.name('autover').usage('<command> [options]').version('2.0.0')
 program
   .command('bump <type>')
   .description('Bump the version (major, minor, patch)')
-  .option('--push', 'Push changes and tags to remote')
-  .option('--publish', 'Publish the package after version bump')
   .action(async (type: 'major' | 'minor' | 'patch') => {
     if (!['major', 'minor', 'patch'].includes(type)) {
       write({
@@ -20,36 +17,7 @@ program
       process.exit(1)
     }
 
-    const config = getConfig()
-
-    if (!config.push || !config.publish) {
-      const answers = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'push',
-          message:
-            'Would you like to automatically push changes and tags to remote?',
-          default: false
-        },
-        {
-          type: 'confirm',
-          name: 'publish',
-          message:
-            'Would you like to automatically publish the package after the version bump?',
-          default: false
-        }
-      ])
-
-      config.push = answers.push
-      config.publish = answers.publish
-      saveConfig(config)
-    }
-
-    const newVersion = await automateVersioning(
-      type,
-      config.push,
-      config.publish
-    )
+    const newVersion = await automateVersioning(type)
 
     write({
       message: `Bumped version to ${newVersion}\n`,

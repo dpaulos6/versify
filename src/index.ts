@@ -4,11 +4,12 @@ import semver from 'semver'
 import { exec } from 'node:child_process'
 import { write } from './utils/log'
 import inquirer from 'inquirer'
-import ora from 'ora' // Import ora for loading spinners
+import ora from 'ora'
+import { getConfig, saveConfig } from './utils/file'
 
 const git: SimpleGit = simpleGit()
 
-const config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
+const config = getConfig().publishConfig
 
 const askOtp = (): Promise<string> => {
   return inquirer
@@ -21,6 +22,107 @@ const askOtp = (): Promise<string> => {
       }
     ])
     .then((answers) => answers.otp)
+}
+
+const askProjectType = async (): Promise<boolean> => {
+  const { isPackage } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'isPackage',
+      message: 'Is this project a package that needs to be published?',
+      default: true
+    }
+  ])
+  return isPackage
+}
+
+const askAutomaticPush = async (): Promise<boolean> => {
+  const { shouldPush } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'shouldPush',
+      message: 'Do you want to automatically push changes after versioning?',
+      default: true
+    }
+  ])
+  return shouldPush
+}
+
+const askAutomaticPublish = async (): Promise<boolean> => {
+  const { shouldPublish } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'shouldPublish',
+      message:
+        'Do you want to automatically publish the package after versioning?',
+      default: true
+    }
+  ])
+  return shouldPublish
+}
+
+const askPublishLocation = async (): Promise<string> => {
+  const { publishTo } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'publishTo',
+      message: 'Where would you like to publish?',
+      choices: ['npm', 'jsr'],
+      default: 'npm'
+    }
+  ])
+  return publishTo
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+const askCredentials = async (publishTo: string): Promise<any> => {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  let credentials: Record<string, any> = {}
+
+  if (publishTo === 'npm') {
+    credentials = askOtp()
+  } else if (publishTo === 'jsr') {
+    credentials = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'username',
+        message: 'Enter your JSR username:'
+      },
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Enter your JSR password:'
+      }
+    ])
+    storePublishConfig()
+  }
+
+  return credentials
+}
+
+const storePublishConfig = (
+  isPackage?: boolean,
+  publishTo?: string,
+  shouldPush?: boolean,
+  shouldPublish?: boolean,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  credentials?: Record<string, any>
+): void => {
+  config.publishConfig = {
+    isPackage,
+    publishTo,
+    shouldPush,
+    shouldPublish,
+    commands: {
+      npm: {
+        publish: 'npm publish'
+      },
+      jsr: {
+        publish: `jsr publish --username=${credentials?.username} --password=${credentials?.password}`
+      }
+    }
+  }
+  saveConfig(config)
 }
 
 /**
@@ -106,28 +208,22 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
  * @param {string} [otp] - The one-time password (OTP) from the authenticator app, required if 2FA is enabled on your npm account.
  * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
  */
-const publishPackage = (otp?: string): Promise<void> => {
+const publishPackage = (command: string): Promise<void> => {
   const spinner = ora('Publishing package...').start()
 
   return new Promise((resolve, reject) => {
-    const { publish } = config
+    const { publishTo } = config
 
-    if (!publish) {
-      write({
-        message: 'Publishing is disabled in the configuration file.',
-        variant: 'warning'
-      })
-      spinner.succeed('Publishing is disabled.')
-      return resolve()
+    if (!publishTo) {
+      spinner.fail('Publish configuration missing.')
+      return reject(new Error('Publish configuration missing'))
     }
 
-    const commandWithOtp = otp ? `npm publish --otp=${otp}` : 'npm publish'
-
-    exec(commandWithOtp, (error) => {
+    exec(command, (error, stdout, stderr) => {
       if (error) {
         spinner.fail('Failed to publish package')
         write({
-          message: 'Failed to publish package',
+          message: `Error: ${stderr || error.message}`,
           variant: 'error'
         })
         return reject(error)
@@ -141,27 +237,64 @@ const publishPackage = (otp?: string): Promise<void> => {
 /**
  * Automates the versioning process.
  * @param {'major' | 'minor' | 'patch'} bumpType - The type of version bump.
- * @param {boolean} [shouldPublish=false] - Whether to publish the package after versioning.
+ * @param {boolean} [shouldPush=false] - Whether to push the changes automatically after versioning.
+ * @param {boolean} [shouldPublish=false] - Whether to publish the package automatically after versioning.
  * @returns {Promise<string>} A promise that resolves to the new version.
  */
 export const automateVersioning = async (
-  bumpType: 'major' | 'minor' | 'patch',
-  shouldPush = false,
-  shouldPublish = false,
-  otpCode = ''
+  bumpType: 'major' | 'minor' | 'patch'
 ): Promise<string> => {
+  await ensureConfig()
+  const { isPackage, publishTo, shouldPush, shouldPublish } = config
+
+  const spinner = ora('Automating versioning...').start()
+
   const newVersion = bumpVersion(bumpType)
   updateVersionInPackageJson(newVersion)
   await commitAndTagRelease(newVersion)
 
+  spinner.succeed('Versioning complete')
+
   if (shouldPush) {
-    await pushChanges()
+    // await pushChanges()
   }
 
-  if (shouldPublish) {
-    const otp = otpCode || (await askOtp())
-    await publishPackage(otp)
+  if (isPackage) {
+    await handlePackagePublishing(publishTo, shouldPublish)
   }
 
   return newVersion
+}
+
+const ensureConfig = async (): Promise<void> => {
+  if (
+    !config.isPackage ||
+    !config.publishTo ||
+    !config.shouldPush ||
+    !config.shouldPublish
+  ) {
+    const isPackage = await askProjectType()
+    const publishTo = isPackage ? await askPublishLocation() : ''
+    const shouldPublish = isPackage ? await askAutomaticPublish() : false
+    const shouldPush = await askAutomaticPush()
+
+    storePublishConfig(isPackage, publishTo, shouldPush, shouldPublish)
+  }
+}
+
+const handlePackagePublishing = async (
+  publishTo: string,
+  shouldPublish: boolean
+): Promise<void> => {
+  const credentials = await askCredentials(publishTo)
+  storePublishConfig(undefined, publishTo)
+
+  const command =
+    publishTo === 'npm'
+      ? `${config.publishConfig.commands.npm.publish}${credentials?.otp ? ` --otp=${credentials.otp}` : ''}`
+      : config.publishConfig.commands.jsr.publish
+
+  if (shouldPublish) {
+    await publishPackage(command)
+  }
 }

@@ -1,7 +1,8 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { write } from './log'
 
-const configFilePath = path.join(__dirname, '..', 'config.json')
+const configFilePath = path.join(__dirname, '..', './config.json')
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const getConfig = (): Record<string, any> => {
@@ -14,5 +15,17 @@ export const getConfig = (): Record<string, any> => {
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const saveConfig = (config: Record<string, any>): void => {
-  fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2))
+  try {
+    const directory = path.dirname(configFilePath)
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory, { recursive: true })
+    }
+
+    fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2))
+  } catch (error) {
+    write({
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      variant: 'error'
+    })
+  }
 }
