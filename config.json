@@ -1,9 +1,4 @@
 {
-  "publish": {
-    "command": "npm publish",
-    "options": {
-      "tag": "latest",
-      "access": "public"
-    }
-  }
+  "push": true,
+  "publish": true
 }
