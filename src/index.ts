@@ -2,10 +2,10 @@ import fs from 'node:fs'
 import simpleGit, { type SimpleGit } from 'simple-git'
 import semver from 'semver'
 import { exec } from 'node:child_process'
+import { write } from './utils/log'
 
 const git: SimpleGit = simpleGit()
 
-// Load config from a JSON file
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
 
 /**
@@ -15,9 +15,19 @@ const config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
 const pushChanges = async (): Promise<void> => {
   try {
     await git.push('origin', 'main', ['--follow-tags'])
-    console.log('Changes and tags pushed to remote.')
-  } catch (error) {
-    console.error('Error pushing changes:', error)
+    write({
+      message: 'Pushed changes to remote repository.\n',
+      variant: 'success'
+    })
+  } catch (error: unknown) {
+    write({
+      message: 'Failed to push changes to remote repository.\n',
+      variant: 'error'
+    })
+    write({
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      variant: 'error'
+    })
     process.exit(1)
   }
 }
@@ -68,9 +78,19 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
     await git.commit(`chore(release): ${version}`)
     await git.addTag(version)
     await pushChanges() // Push the commit and tag
-    console.log(`Release ${version} tagged and pushed.`)
-  } catch (error) {
-    console.error('Error during Git commit/tag:', error)
+    write({
+      message: `Committed and tagged release ${version}`,
+      variant: 'success'
+    })
+  } catch (error: unknown) {
+    write({
+      message: 'Failed to commit and tag release.\n',
+      variant: 'error'
+    })
+    write({
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      variant: 'error'
+    })
     process.exit(1)
   }
 }
@@ -106,12 +126,18 @@ const publishPackage = (otp?: string): Promise<void> => {
       return optionValue ? `${cmd} --${key}=${optionValue}` : cmd
     }, commandWithOtp)
 
-    exec(commandWithOptions, (error, stdout, stderr) => {
+    exec(commandWithOptions, (error) => {
       if (error) {
-        console.error(`Error publishing package: ${stderr}`)
+        write({
+          message: 'Failed to publish package',
+          variant: 'error'
+        })
         return reject(error)
       }
-      console.log(`Package published: ${stdout}`)
+      write({
+        message: 'Package published successfully',
+        variant: 'success'
+      })
       resolve()
     })
   })
