@@ -1,8 +1,16 @@
 {
   "name": "@dpaulos6/autover",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dpaulos6/autover"
+  },
+  "homepage": "https://github.com/dpaulos6/autover#readme",
+  "bugs": {
+    "url": "https://github.com/dpaulos6/autover/issues"
+  },
   "scripts": {
     "build": "tsc",
     "cli": "node dist/cli.js"
@@ -22,6 +30,9 @@
   ],
   "author": "dpaulos6",
   "license": "MIT",
+  "contributors": [
+    "dpaulos6"
+  ],
   "dependencies": {
     "@types/node": "^22.10.5",
     "@types/semver": "^7.5.8",
