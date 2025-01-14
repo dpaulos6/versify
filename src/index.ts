@@ -76,24 +76,40 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
 }
 
 /**
- * Publishes the package to the registry using the configuration from publish-config.json.
- * @returns {Promise<void>} A promise that resolves when the publish is complete.
+ * Publishes the package to the registry using the configuration from the publish-config.json.
+ *
+ * This function constructs and executes the `npm publish` command based on the configuration options.
+ * If Two-Factor Authentication (2FA) is required, an OTP can be provided as an argument.
+ *
+ * @param {string} [otp] - The one-time password (OTP) from the authenticator app, required if 2FA is enabled on your npm account.
+ * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
+ *
+ * @example
+ * // Publishing with OTP
+ * publishPackage("123456")
+ *   .then(() => console.log("Package published successfully"))
+ *   .catch(err => console.error("Failed to publish package", err));
  */
-const publishPackage = (): Promise<void> => {
+const publishPackage = (otp?: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!config.publish.enabled) {
       console.log('Publish is disabled in the configuration.')
       return resolve() // Skip publishing if disabled
     }
 
-    const { command, options } = config.publish
-    const publishCommand = `${command}`
+    const { command, registry, options } = config.publish
+    const publishCommand = `${command} --registry ${registry}`
+
+    // Add OTP to command if available
+    const commandWithOtp = otp
+      ? `${publishCommand} --otp=${otp}`
+      : publishCommand
 
     // Add additional options to the command
     const commandWithOptions = Object.keys(options).reduce((cmd, key) => {
       const optionValue = options[key]
       return optionValue ? `${cmd} --${key}=${optionValue}` : cmd
-    }, publishCommand)
+    }, commandWithOtp)
 
     exec(commandWithOptions, (error, stdout, stderr) => {
       if (error) {
@@ -115,7 +131,8 @@ const publishPackage = (): Promise<void> => {
 export const automateVersioning = async (
   bumpType: 'major' | 'minor' | 'patch',
   shouldPush = false,
-  shouldPublish = false
+  shouldPublish = false,
+  otpCode = ''
 ): Promise<string> => {
   const newVersion = bumpVersion(bumpType)
   updateVersionInPackageJson(newVersion)
@@ -126,7 +143,7 @@ export const automateVersioning = async (
   }
 
   if (shouldPublish) {
-    await publishPackage()
+    await publishPackage(otpCode)
   }
 
   return newVersion
