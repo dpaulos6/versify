@@ -3,10 +3,24 @@ import simpleGit, { type SimpleGit } from 'simple-git'
 import semver from 'semver'
 import { exec } from 'node:child_process'
 import { write } from './utils/log'
+import inquirer from 'inquirer'
 
 const git: SimpleGit = simpleGit()
 
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'))
+
+const askOtp = (): Promise<string> => {
+  return inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'otp',
+        message: 'Please enter your OTP (leave blank if not needed):',
+        default: ''
+      }
+    ])
+    .then((answers) => answers.otp)
+}
 
 /**
  * Pushes changes and tags to the remote repository.
@@ -95,6 +109,21 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
   }
 }
 
+/**
+ * Publishes the package to the registry using the configuration from the publish-config.json.
+ *
+ * This function constructs and executes the `npm publish` command based on the configuration options.
+ * If Two-Factor Authentication (2FA) is required, an OTP can be provided as an argument.
+ *
+ * @param {string} [otp] - The one-time password (OTP) from the authenticator app, required if 2FA is enabled on your npm account.
+ * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
+ *
+ * @example
+ * // Publishing with OTP
+ * publishPackage("123456")
+ *   .then(() => console.log("Package published successfully"))
+ *   .catch(err => console.error("Failed to publish package", err));
+ */
 const publishPackage = (otp?: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const { publish } = config
@@ -107,7 +136,7 @@ const publishPackage = (otp?: string): Promise<void> => {
       return resolve()
     }
 
-    const commandWithOtp = `npm publish --otp=${otp}`
+    const commandWithOtp = otp ? `npm publish --otp=${otp}` : 'npm publish'
 
     exec(commandWithOtp, (error) => {
       if (error) {
@@ -147,7 +176,8 @@ export const automateVersioning = async (
   }
 
   if (shouldPublish) {
-    await publishPackage(otpCode)
+    const otp = otpCode || (await askOtp())
+    await publishPackage(otp)
   }
 
   return newVersion
