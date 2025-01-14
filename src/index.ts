@@ -101,9 +101,7 @@ const storePublishConfig = (
   isPackage?: boolean,
   publishTo?: string,
   shouldPush?: boolean,
-  shouldPublish?: boolean,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  credentials?: Record<string, any>
+  shouldPublish?: boolean
 ): void => {
   const config = getConfig()
   config.publishConfig = {
@@ -113,10 +111,12 @@ const storePublishConfig = (
     shouldPublish,
     commands: {
       npm: {
-        publish: 'npm publish'
+        publish: 'npm publish',
+        options: ['--otp']
       },
       jsr: {
-        publish: `jsr publish --username=${credentials?.username} --password=${credentials?.password}`
+        publish: 'jsr publish',
+        options: ['--username', '--password']
       }
     }
   }
@@ -210,7 +210,7 @@ const publishPackage = (command: string): Promise<void> => {
   const spinner = ora('Publishing package...').start()
 
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command, (error, stderr) => {
       if (error) {
         spinner.fail('Failed to publish package')
         write({
@@ -281,12 +281,24 @@ const handlePackagePublishing = async (
 ): Promise<void> => {
   const config = getConfig().publishConfig
   const credentials = await askCredentials(publishTo)
-  storePublishConfig(credentials)
 
-  const command =
-    publishTo === 'npm'
-      ? `${config.commands.npm.publish} --otp=${credentials.otp}`
-      : config.commands.jsr.publish
+  const command = (() => {
+    const publishCommand = config.commands[publishTo].publish
+    const options = config.commands[publishTo].options
+    let commandString = publishCommand
+
+    for (const option of options) {
+      if (option === '--otp') {
+        commandString += ` ${option}=${credentials.otp}`
+      } else if (option === '--username') {
+        commandString += ` ${option}=${credentials.username}`
+      } else if (option === '--password') {
+        commandString += ` ${option}=${credentials.password}`
+      }
+    }
+
+    return commandString
+  })()
 
   if (shouldPublish) {
     await publishPackage(command)

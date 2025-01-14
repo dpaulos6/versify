@@ -65,10 +65,12 @@ const createDefaultConfig = (): Record<string, any> => {
       shouldPublish: true,
       commands: {
         npm: {
-          publish: 'npm publish'
+          publish: 'npm publish',
+          options: ['--otp']
         },
         jsr: {
-          publish: 'jsr publish --username= --password='
+          publish: 'jsr publish',
+          options: ['--username', '--password']
         }
       }
     }
