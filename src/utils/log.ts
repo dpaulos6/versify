@@ -8,11 +8,11 @@ export const write = ({
 }: { message: string; variant: Variant }) => {
   const variantIcons: Record<Variant, string> = {
     info: 'ℹ️',
-    success: '✔️',
+    success: '✔',
     warning: '⚠️',
     error: '❌'
   }
   const icon = variantIcons[variant]
 
-  process.stdout.write(chalk.white(`${icon} ${message}`))
+  process.stdout.write(`${icon} ${chalk.white(message)}`)
 }

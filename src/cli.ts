@@ -52,7 +52,7 @@ program
     )
 
     write({
-      message: `Bumped version to ${newVersion}\n`,
+      message: `Bumped version to ${newVersion}`,
       variant: 'success'
     })
   })

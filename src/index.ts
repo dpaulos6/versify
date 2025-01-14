@@ -163,10 +163,5 @@ export const automateVersioning = async (
     await publishPackage(otp)
   }
 
-  write({
-    message: `✔ Versioning complete: ${newVersion}`,
-    variant: 'success'
-  })
-
   return newVersion
 }
