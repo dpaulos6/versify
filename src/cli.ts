@@ -3,11 +3,14 @@ import { program } from 'commander'
 import { automateVersioning } from './index'
 
 program
+  .name('autover')
+  .usage('<command> [options]')
+
+program
   .command('bump <type>')
   .description('Bump the version (major, minor, patch)')
   .action(async (type: 'major' | 'minor' | 'patch') => {
     if (!['major', 'minor', 'patch'].includes(type)) {
-      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error(
         'Error: Please provide a valid bump type (major, minor, patch).'
       )
