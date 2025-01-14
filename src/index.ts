@@ -92,11 +92,6 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
  */
 const publishPackage = (otp?: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    if (!config.publish.enabled) {
-      console.log('Publish is disabled in the configuration.')
-      return resolve() // Skip publishing if disabled
-    }
-
     const { command, registry, options } = config.publish
     const publishCommand = `${command} --registry ${registry}`
 
