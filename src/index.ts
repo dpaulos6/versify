@@ -4,6 +4,7 @@ import semver from 'semver'
 import { exec } from 'node:child_process'
 import { write } from './utils/log'
 import inquirer from 'inquirer'
+import ora from 'ora' // Import ora for loading spinners
 
 const git: SimpleGit = simpleGit()
 
@@ -27,17 +28,13 @@ const askOtp = (): Promise<string> => {
  * @returns {Promise<void>} A promise that resolves when the push is complete.
  */
 const pushChanges = async (): Promise<void> => {
+  const spinner = ora('Pushing changes to remote repository...').start()
+
   try {
     await git.push('origin', 'main', ['--follow-tags'])
-    write({
-      message: 'Pushed changes to remote repository.',
-      variant: 'success'
-    })
+    spinner.succeed('Pushed changes to remote repository.')
   } catch (error: unknown) {
-    write({
-      message: 'Failed to push changes to remote repository.',
-      variant: 'error'
-    })
+    spinner.fail('Failed to push changes to remote repository.')
     write({
       message: `Error: ${error instanceof Error ? error.message : String(error)}`,
       variant: 'error'
@@ -87,20 +84,15 @@ const updateVersionInPackageJson = (newVersion: string): void => {
  * @returns {Promise<void>} A promise that resolves when the commit and tag are complete.
  */
 const commitAndTagRelease = async (version: string): Promise<void> => {
+  const spinner = ora('Committing and tagging release...').start()
+
   try {
     await git.add('./*')
     await git.commit(`chore(release): ${version}`)
     await git.addTag(version)
-    await pushChanges() // Push the commit and tag
-    write({
-      message: `Committed and tagged release ${version}`,
-      variant: 'success'
-    })
+    spinner.succeed(`Committed and tagged release ${version}`)
   } catch (error: unknown) {
-    write({
-      message: 'Failed to commit and tag release.\n',
-      variant: 'error'
-    })
+    spinner.fail('Failed to commit and tag release.')
     write({
       message: `Error: ${error instanceof Error ? error.message : String(error)}`,
       variant: 'error'
@@ -111,20 +103,12 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
 
 /**
  * Publishes the package to the registry using the configuration from the publish-config.json.
- *
- * This function constructs and executes the `npm publish` command based on the configuration options.
- * If Two-Factor Authentication (2FA) is required, an OTP can be provided as an argument.
- *
  * @param {string} [otp] - The one-time password (OTP) from the authenticator app, required if 2FA is enabled on your npm account.
  * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
- *
- * @example
- * // Publishing with OTP
- * publishPackage("123456")
- *   .then(() => console.log("Package published successfully"))
- *   .catch(err => console.error("Failed to publish package", err));
  */
 const publishPackage = (otp?: string): Promise<void> => {
+  const spinner = ora('Publishing package...').start()
+
   return new Promise((resolve, reject) => {
     const { publish } = config
 
@@ -133,6 +117,7 @@ const publishPackage = (otp?: string): Promise<void> => {
         message: 'Publishing is disabled in the configuration file.',
         variant: 'warning'
       })
+      spinner.succeed('Publishing is disabled.')
       return resolve()
     }
 
@@ -140,16 +125,14 @@ const publishPackage = (otp?: string): Promise<void> => {
 
     exec(commandWithOtp, (error) => {
       if (error) {
+        spinner.fail('Failed to publish package')
         write({
           message: 'Failed to publish package',
           variant: 'error'
         })
         return reject(error)
       }
-      write({
-        message: 'Package published successfully',
-        variant: 'success'
-      })
+      spinner.succeed('Package published successfully')
       resolve()
     })
   })
@@ -167,6 +150,8 @@ export const automateVersioning = async (
   shouldPublish = false,
   otpCode = ''
 ): Promise<string> => {
+  const spinner = ora('Automating versioning...').start()
+
   const newVersion = bumpVersion(bumpType)
   updateVersionInPackageJson(newVersion)
   await commitAndTagRelease(newVersion)
@@ -180,5 +165,6 @@ export const automateVersioning = async (
     await publishPackage(otp)
   }
 
+  spinner.succeed(`Versioning complete: ${newVersion}`)
   return newVersion
 }
