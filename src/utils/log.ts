@@ -7,10 +7,10 @@ export const write = ({
   variant
 }: { message: string; variant: Variant }) => {
   const variantIcons: Record<Variant, string> = {
-    info: 'ℹ️',
-    success: '✔',
-    warning: '⚠️',
-    error: '❌'
+    info: `${chalk.blue('ℹ️')}`,
+    success: `${chalk.green('✔')}`,
+    warning: `${chalk.yellow('⚠️')}`,
+    error: `${chalk.red('❌')}`
   }
   const icon = variantIcons[variant]
 
