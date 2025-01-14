@@ -6,14 +6,13 @@ export const write = ({
   message,
   variant
 }: { message: string; variant: Variant }) => {
-  const variantColors: Record<Variant, (text: string) => string> = {
-    info: chalk.blue,
-    success: chalk.green,
-    warning: chalk.yellow,
-    error: chalk.red
+  const variantIcons: Record<Variant, string> = {
+    info: 'ℹ️',
+    success: '✔️',
+    warning: '⚠️',
+    error: '❌'
   }
+  const icon = variantIcons[variant]
 
-  const colorize = variantColors[variant] || chalk.white
-
-  process.stdout.write(`${colorize(message)}\n`)
+  process.stdout.write(chalk.white(`${icon} ${message}`))
 }
