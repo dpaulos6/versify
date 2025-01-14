@@ -41,7 +41,7 @@ This will:
 1. Read the current version from `package.json`.
 2. Increment the version based on the specified type (major, minor, or patch).
 3. Update `package.json` with the new version.
-4. Commit all changes to Git with a message `chore: release version <new_version`>.
+4. Commit all changes to Git with a message `chore: release version <new_version`>`.
 5. Tag the release in Git with the new version.
 
 ### Example Error
@@ -79,7 +79,6 @@ The Git tag will be applied as:
 You can manually push changes and tags by running:
 
 ```bash
-```bash 
 git push && git push --tags # changes + all tags
 
 # or
