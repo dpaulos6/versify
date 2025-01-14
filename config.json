@@ -1,4 +1,16 @@
 {
-  "push": true,
-  "publish": true
+  "publishConfig": {
+    "isPackage": true,
+    "publishTo": "npm",
+    "shouldPush": true,
+    "shouldPublish": true,
+    "commands": {
+      "npm": {
+        "publish": "npm publish"
+      },
+      "jsr": {
+        "publish": "jsr publish --username=undefined --password=undefined"
+      }
+    }
+  }
 }
