@@ -9,8 +9,6 @@ import { getConfig, saveConfig } from './utils/file'
 
 const git: SimpleGit = simpleGit()
 
-const config = getConfig().publishConfig
-
 const askOtp = (): Promise<string> => {
   return inquirer
     .prompt([
@@ -80,7 +78,7 @@ const askCredentials = async (publishTo: string): Promise<any> => {
   let credentials: Record<string, any> = {}
 
   if (publishTo === 'npm') {
-    credentials = askOtp()
+    credentials.otp = await askOtp()
   } else if (publishTo === 'jsr') {
     credentials = await inquirer.prompt([
       {
@@ -94,7 +92,6 @@ const askCredentials = async (publishTo: string): Promise<any> => {
         message: 'Enter your JSR password:'
       }
     ])
-    storePublishConfig()
   }
 
   return credentials
@@ -108,6 +105,7 @@ const storePublishConfig = (
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   credentials?: Record<string, any>
 ): void => {
+  const config = getConfig()
   config.publishConfig = {
     isPackage,
     publishTo,
@@ -205,20 +203,13 @@ const commitAndTagRelease = async (version: string): Promise<void> => {
 
 /**
  * Publishes the package to the registry using the configuration from the publish-config.json.
- * @param {string} [otp] - The one-time password (OTP) from the authenticator app, required if 2FA is enabled on your npm account.
+ * @param {string} command - The command to execute for publishing.
  * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
  */
 const publishPackage = (command: string): Promise<void> => {
   const spinner = ora('Publishing package...').start()
 
   return new Promise((resolve, reject) => {
-    const { publishTo } = config
-
-    if (!publishTo) {
-      spinner.fail('Publish configuration missing.')
-      return reject(new Error('Publish configuration missing'))
-    }
-
     exec(command, (error, stdout, stderr) => {
       if (error) {
         spinner.fail('Failed to publish package')
@@ -245,6 +236,8 @@ export const automateVersioning = async (
   bumpType: 'major' | 'minor' | 'patch'
 ): Promise<string> => {
   await ensureConfig()
+  const config = getConfig().publishConfig
+  console.log(config)
   const { isPackage, publishTo, shouldPush, shouldPublish } = config
 
   const spinner = ora('Automating versioning...').start()
@@ -256,7 +249,7 @@ export const automateVersioning = async (
   spinner.succeed('Versioning complete')
 
   if (shouldPush) {
-    // await pushChanges()
+    await pushChanges()
   }
 
   if (isPackage) {
@@ -267,6 +260,7 @@ export const automateVersioning = async (
 }
 
 const ensureConfig = async (): Promise<void> => {
+  const config = getConfig().publishConfig
   if (
     !config.isPackage ||
     !config.publishTo ||
@@ -286,13 +280,16 @@ const handlePackagePublishing = async (
   publishTo: string,
   shouldPublish: boolean
 ): Promise<void> => {
+  const config = getConfig().publishConfig
   const credentials = await askCredentials(publishTo)
-  storePublishConfig(undefined, publishTo)
+  storePublishConfig(undefined, undefined, undefined, undefined, credentials)
+
+  console.log(credentials)
 
   const command =
     publishTo === 'npm'
-      ? `${config.publishConfig.commands.npm.publish}${credentials?.otp ? ` --otp=${credentials.otp}` : ''}`
-      : config.publishConfig.commands.jsr.publish
+      ? `${config.commands.npm.publish} --otp=${credentials.otp}`
+      : config.commands.jsr.publish
 
   if (shouldPublish) {
     await publishPackage(command)
