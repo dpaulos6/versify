@@ -19,7 +19,7 @@ After installing, you can use the `autover` command to bump the version of your 
 To bump the version, run the following command:
 
 ```bash
-autover bump <type>
+autover bump <type> # add --push to automatically push changes
 ```
 
 Where `<type>` can be one of the following:
@@ -76,13 +76,7 @@ The Git tag will be applied as:
 1.1.2
 ```
 
-Note that you will have to push both the changes and the git tag. To do so, run:
-
-```bash
-git push --follow-tags
-```
-
-Alternatively, you can push changes and tags individually with:
+You can manually push changes and tags by running:
 
 ```bash
 ```bash 
@@ -90,7 +84,7 @@ git push && git push --tags # changes + all tags
 
 # or
 
-git push && git push origin <tag-name> # changes + single tag (eg. 1.1.2)
+git push && git push origin <tag-name> # changes + individual tag (eg. 1.1.2)
 ```
 
 ## License
