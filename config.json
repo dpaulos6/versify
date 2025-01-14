@@ -1,7 +1,5 @@
 {
   "publish": {
-    "enabled": true,
-    "registry": "https://registry.npmjs.org/",
     "command": "npm publish",
     "options": {
       "tag": "latest",

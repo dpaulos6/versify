@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/autover",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {

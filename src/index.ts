@@ -86,8 +86,8 @@ const publishPackage = (): Promise<void> => {
       return resolve() // Skip publishing if disabled
     }
 
-    const { command, registry, options } = config.publish
-    const publishCommand = `${command} --registry ${registry}`
+    const { command, options } = config.publish
+    const publishCommand = `${command}`
 
     // Add additional options to the command
     const commandWithOptions = Object.keys(options).reduce((cmd, key) => {
