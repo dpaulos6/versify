@@ -150,8 +150,6 @@ export const automateVersioning = async (
   shouldPublish = false,
   otpCode = ''
 ): Promise<string> => {
-  const spinner = ora('Automating versioning...').start()
-
   const newVersion = bumpVersion(bumpType)
   updateVersionInPackageJson(newVersion)
   await commitAndTagRelease(newVersion)
@@ -165,6 +163,10 @@ export const automateVersioning = async (
     await publishPackage(otp)
   }
 
-  spinner.succeed(`Versioning complete: ${newVersion}`)
+  write({
+    message: `✔ Versioning complete: ${newVersion}`,
+    variant: 'success'
+  })
+
   return newVersion
 }
