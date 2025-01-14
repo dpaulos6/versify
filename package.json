@@ -1,15 +1,27 @@
 {
-  "name": "versioning-automation",
-  "version": "1.0.1",
+  "name": "autover",
+  "version": "2.0.0",
+  "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "cli": "node dist/cli.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "bin": {
+    "autover": "./dist/cli.js"
+  },
+  "keywords": [
+    "cli",
+    "versioning",
+    "semver",
+    "bump",
+    "automation",
+    "git",
+    "release",
+    "npm"
+  ],
+  "author": "dpaulos6",
+  "license": "MIT",
   "dependencies": {
     "@types/node": "^22.10.5",
     "@types/semver": "^7.5.8",
