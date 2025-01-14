@@ -4,7 +4,7 @@ import { automateVersioning } from './index'
 import { getConfig, saveConfig } from './utils/file' // Import file utility functions
 import { write } from './utils/log'
 
-program.name('autover').usage('<command> [options]').version('1.3.6')
+program.name('autover').usage('<command> [options]').version('2.0.0')
 
 program
   .command('bump <type>')
@@ -52,7 +52,7 @@ program
     )
 
     write({
-      message: `Bumped version to ${newVersion}`,
+      message: `Bumped version to ${newVersion}\n`,
       variant: 'success'
     })
   })
