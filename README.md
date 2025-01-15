@@ -2,10 +2,6 @@
 
 A Command Line Interface (CLI) tool for automating version bumps, Git tagging, and package publishing in your projects. This tool bumps your version based on Semantic Versioning (SemVer) principles, commits and tags the new version in Git, and optionally publishes the package.
 
-## Warning
-
-JSR is still a work in progress, it might not work as expected.
-
 ## Installation
 
 You can install the tool globally via npm:
@@ -88,10 +84,16 @@ If your project is a package that needs to be published, you can configure the t
 
 When you run the tool for the first time, you will be prompted to save your configuration settings in a configuration file. The settings include:
 
-1. Is this project a package that needs to be published?
-2. Where would you like to publish? (e.g., npm, jsr)
-3. Do you want to automatically publish the package after versioning?
-4. Do you want to automatically push changes after versioning?
+1. Do you want to automatically publish the package after versioning?
+2. Do you want to automatically push changes after versioning?
+
+If the cli founds more than one configuration file (`package.json`, `deno.json`, `jsr.json`, ...), it will prompt you to choose one of them and will use that file for next version bumps.
+
+You can always change the file by running the setup wizard:
+
+```bash
+autover setup
+```
 
 The configuration will be saved in a `config.json` file in your project directory.
 
@@ -101,13 +103,15 @@ The base configuration is as follows:
 
 ```json
 {
-  "isPackage": false,
+  "configFile": "package.json",
   "shouldPush": false,
   "shouldPublish": false,
   "publish": {
     "name": "npm",
     "command": "npm publish",
-    "options": ["--otp"]
+    "options": [
+      "--otp"
+    ]
   }
 }
 ```
