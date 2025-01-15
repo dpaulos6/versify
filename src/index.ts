@@ -256,13 +256,14 @@ export const automateVersioning = async (
   if (config !== undefined) {
     const { isPackage, shouldPush, shouldPublish } = config
 
-    const spinner = ora('Automating versioning...').start()
+    write({
+      message: 'Starting versioning process...',
+      variant: 'info'
+    })
 
     const newVersion = bumpVersion(bumpType)
     updateVersionInPackageJson(newVersion)
     await commitAndTagRelease(newVersion)
-
-    spinner.succeed('Versioning complete')
 
     if (shouldPush) {
       await pushChanges()
