@@ -4,7 +4,7 @@ import {} from './utils/file'
 import { write } from './utils/log'
 import { setupWizard } from './helpers/setup'
 
-program.name('autover').usage('<command> [options]').version('2.0.0')
+program.name('versify').usage('<command> [options]').version('2.0.0')
 
 program
   .command('bump <type>')

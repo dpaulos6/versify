@@ -7,19 +7,19 @@ A Command Line Interface (CLI) tool for automating version bumps, Git tagging, a
 You can install the tool globally via npm:
 
 ```bash
-npm install -g @dpaulos6/autover
+npm install -g @dpaulos6/versify
 ```
 
 ## Usage
 
-After installing, you can use the `autover` command to bump the version of your project, tag the release in Git, and optionally publish the package.
+After installing, you can use the `versify` command to bump the version of your project, tag the release in Git, and optionally publish the package.
 
 ### Bump the version
 
 To bump the version, run the following command:
 
 ```bash
-autover bump <type>
+versify bump <type>
 ```
 
 Where `<type>` can be one of the following:
@@ -33,7 +33,7 @@ Where `<type>` can be one of the following:
 To bump the major version:
 
 ```bash
-autover bump major
+versify bump major
 ```
 
 This will:
@@ -92,7 +92,7 @@ If the cli founds more than one configuration file (`package.json`, `deno.json`,
 You can always change the file by running the setup wizard:
 
 ```bash
-autover setup
+versify setup
 ```
 
 The configuration will be saved in a `config.json` file in your project directory.
@@ -119,7 +119,7 @@ The base configuration is as follows:
 If you want to use default configuration even if you already setup your configuration file, do so by running:
 
 ```bash
-autover bump minor -d # use flag -d or --default to ignore your saved configuration and use defaults
+versify bump minor -d # use flag -d or --default to ignore your saved configuration and use defaults
 ```
 
 ### Package Publishing Commands

@@ -1,15 +1,15 @@
 {
-  "name": "@dpaulos6/autover",
-  "version": "2.7.1",
+  "name": "@dpaulos6/versify",
+  "version": "3.0.0",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dpaulos6/autover.git"
+    "url": "git+https://github.com/dpaulos6/versify.git"
   },
-  "homepage": "https://github.com/dpaulos6/autover#readme",
+  "homepage": "https://github.com/dpaulos6/versify#readme",
   "bugs": {
-    "url": "https://github.com/dpaulos6/autover/issues"
+    "url": "https://github.com/dpaulos6/versify/issues"
   },
   "scripts": {
     "dev": "tsc -w",
@@ -19,7 +19,7 @@
     "preinstall": "tsc"
   },
   "bin": {
-    "autover": "bin/autover"
+    "versify": "bin/versify"
   },
   "keywords": [
     "cli",
@@ -33,7 +33,9 @@
   ],
   "author": "dpaulos6",
   "license": "MIT",
-  "contributors": ["dpaulos6"],
+  "contributors": [
+    "dpaulos6"
+  ],
   "dependencies": {
     "@types/node": "^22.10.5",
     "@types/semver": "^7.5.8",
