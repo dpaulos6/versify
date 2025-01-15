@@ -1,13 +1,13 @@
 import fs from 'node:fs'
 import simpleGit, { type SimpleGit } from 'simple-git'
 import semver from 'semver'
-import { exec } from 'node:child_process'
 import { write } from './utils/log'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { getConfig, saveConfig } from './utils/file'
-import { presets } from './data/presets'
+import { exec, spawn } from 'node:child_process'
 import { defaultConfig } from './types/config'
+import { presets } from './data/presets'
 
 const git: SimpleGit = simpleGit()
 
@@ -79,6 +79,7 @@ export const askGitCredentials = async (): Promise<{
   username?: string
   password?: string
 }> => {
+  // Ask if the user wants to store credentials
   const { storeCredentials } = await inquirer.prompt([
     {
       type: 'confirm',
@@ -92,6 +93,7 @@ export const askGitCredentials = async (): Promise<{
     return { storeCredentials }
   }
 
+  // Prompt for username and password if user wants to store credentials
   const answers = await inquirer.prompt([
     {
       type: 'input',
@@ -104,6 +106,43 @@ export const askGitCredentials = async (): Promise<{
       message: 'Enter your Git password:'
     }
   ])
+
+  try {
+    const gitProcess = spawn('git', ['credential-manager', 'store'])
+
+    gitProcess.stdin.write(
+      `protocol=https\nhost=github.com\nusername=${answers.username}\npassword=${answers.password}\n`
+    )
+    gitProcess.stdin.end()
+
+    gitProcess.on('close', (code) => {
+      if (code === 0) {
+        spawn('git', ['config', '--global', 'user.name', answers.username])
+        spawn('git', [
+          'config',
+          '--global',
+          'user.email',
+          `${answers.username}@github.com`
+        ])
+
+        write({
+          message: 'Stored credentials successfully.',
+          variant: 'success'
+        })
+      } else {
+        write({
+          message: 'Failed to store credentials.',
+          variant: 'error'
+        })
+      }
+    })
+  } catch (error) {
+    write({
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      variant: 'error'
+    })
+  }
+
   return { storeCredentials, ...answers }
 }
 
