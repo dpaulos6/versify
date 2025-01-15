@@ -131,7 +131,8 @@ const pushChanges = async (): Promise<void> => {
   const spinner = ora('Pushing changes to remote repository...').start()
 
   try {
-    await git.push('origin', 'main', ['--follow-tags'])
+    await git.push('origin', 'main')
+    await git.push('origin', '--tags')
     spinner.succeed('Pushed changes to remote repository.')
   } catch (error: unknown) {
     spinner.fail('Failed to push changes to remote repository.')
