@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/autover",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "license": "MIT",
   "scripts": {
     "dev": "deno run ./src/cli.ts"
@@ -22,6 +22,9 @@
     "ultracite": "4.1.15"
   },
   "publish": {
-    "include": ["README.md", "src/**/*.ts"]
+    "include": [
+      "README.md",
+      "src/**/*.ts"
+    ]
   }
 }

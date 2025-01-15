@@ -5,15 +5,19 @@ import { write } from '../utils/log'
 import inquirer from 'inquirer'
 import { getConfig } from '../utils/file'
 
-export const findConfigFiles = async (): Promise<{
+export const findConfigFiles = async (
+  bypass?: boolean
+): Promise<{
   configFile: string
   publish: string
 }> => {
-  const config = getConfig()
-  if (config !== undefined && config.configFile !== undefined) {
-    return {
-      configFile: config.configFile,
-      publish: config.publish.name
+  if (!bypass) {
+    const config = getConfig()
+    if (config !== undefined && config.configFile !== undefined) {
+      return {
+        configFile: config.configFile,
+        publish: config.publish.name
+      }
     }
   }
 

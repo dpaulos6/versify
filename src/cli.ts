@@ -31,7 +31,7 @@ program
   .command('setup')
   .description('Runs the setup wizard')
   .action(async () => {
-    await setupWizard()
+    await setupWizard({ bypass: true })
   })
 
 program.parse(process.argv)

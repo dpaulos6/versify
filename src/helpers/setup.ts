@@ -4,9 +4,11 @@ import { askAutomaticPublish, askAutomaticPush } from '../helpers/questions'
 import { findConfigFiles } from '../helpers/files'
 import { presets } from '../data/presets'
 
-export const setupWizard = async (): Promise<void> => {
+export const setupWizard = async ({
+  bypass
+}: { bypass?: boolean }): Promise<void> => {
   try {
-    const setupFiles = await findConfigFiles()
+    const setupFiles = await findConfigFiles(bypass)
     const configFile = setupFiles.configFile
     const publish = presets[setupFiles.publish].publish
 

@@ -16,7 +16,7 @@ export const ensureConfig = async (): Promise<void> => {
     config.shouldPush === undefined ||
     config.shouldPublish === undefined
   ) {
-    await setupWizard()
+    await setupWizard({ bypass: false })
   }
 }
 
