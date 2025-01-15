@@ -13,13 +13,13 @@ const git: SimpleGit = simpleGit()
 
 const askOtp = (): Promise<string> => {
   return inquirer
-    .prompt([
+    .prompt<{ otp: string }>([
       {
         type: 'input',
         name: 'otp',
         message: 'Please enter your OTP (leave blank if not needed):',
         default: '',
-        transformer: (input: string) => input,
+        transformer: (input: string) => (input ? '*'.repeat(input.length) : '')
       }
     ])
     .then((answers) => answers.otp)
