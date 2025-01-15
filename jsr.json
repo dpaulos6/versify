@@ -1,0 +1,27 @@
+{
+  "name": "@dpaulos6/autover",
+  "version": "2.4.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "deno run ./src/cli.ts"
+  },
+  "exports": "./src/cli.ts",
+  "imports": {
+    "@types/node": "^22.10.5",
+    "@types/semver": "^7.5.8",
+    "chalk": "^4.0.0",
+    "commander": "^13.0.0",
+    "inquirer": "^12.3.2",
+    "ora": "5.4.1",
+    "semver": "^7.6.3",
+    "simple-git": "^3.27.0",
+    "typescript": "^5.7.3",
+    "@biomejs/biome": "1.9.4",
+    "@types/commander": "^2.12.5",
+    "@types/inquirer": "^9.0.7",
+    "ultracite": "4.1.15"
+  },
+  "publish": {
+    "include": ["README.md", "src/**/*.ts"]
+  }
+}
