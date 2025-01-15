@@ -1,6 +1,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import chalk from 'chalk'
+import type chalk from 'chalk'
+import { info, success, warning, error, text } from '../config/chalk'
 
 type Variant = 'info' | 'success' | 'warning' | 'error'
 
@@ -8,15 +9,16 @@ export const write = ({
   message,
   variant
 }: { message: string; variant: Variant }) => {
-  const variantIcons: Record<Variant, string> = {
-    info: `${chalk.blue('ℹ️')}`,
-    success: `${chalk.green('✔')}`,
-    warning: `${chalk.yellow('⚠️')}`,
-    error: `${chalk.red('❌')}`
+  const variantColors: Record<Variant, chalk.Chalk> = {
+    info: info,
+    success: success,
+    warning: warning,
+    error: error
   }
-  const icon = variantIcons[variant]
 
-  process.stdout.write(`${icon} ${chalk.white(message)}\n`)
+  process.stdout.write(
+    `${variantColors[variant](variant.toUpperCase())}: ${text(message)}\n`
+  )
 }
 
 const logFilePath = path.join(__dirname, '..', './log.txt')

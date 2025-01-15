@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/autover",
-  "version": "2.2.6",
+  "version": "2.6.9",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {
@@ -32,7 +32,9 @@
   ],
   "author": "dpaulos6",
   "license": "MIT",
-  "contributors": ["dpaulos6"],
+  "contributors": [
+    "dpaulos6"
+  ],
   "dependencies": {
     "@types/node": "^22.10.5",
     "@types/semver": "^7.5.8",
