@@ -22,9 +22,6 @@
     "ultracite": "4.1.15"
   },
   "publish": {
-    "include": [
-      "README.md",
-      "src/**/*.ts"
-    ]
+    "include": ["README.md", "src/**/*.ts"]
   }
 }

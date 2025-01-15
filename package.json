@@ -15,6 +15,7 @@
     "dev": "tsc -w",
     "build": "tsc",
     "cli": "node dist/cli.js",
+    "format": "biome format . --write",
     "preinstall": "tsc"
   },
   "bin": {
@@ -32,9 +33,7 @@
   ],
   "author": "dpaulos6",
   "license": "MIT",
-  "contributors": [
-    "dpaulos6"
-  ],
+  "contributors": ["dpaulos6"],
   "dependencies": {
     "@types/node": "^22.10.5",
     "@types/semver": "^7.5.8",
