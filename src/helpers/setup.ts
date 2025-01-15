@@ -1,20 +1,19 @@
 import { write } from '../utils/log'
 import { storePublishConfig } from '../helpers/config'
-import {
-  askAutomaticPublish,
-  askAutomaticPush,
-} from '../helpers/questions'
+import { askAutomaticPublish, askAutomaticPush } from '../helpers/questions'
 import { findConfigFiles } from '../helpers/files'
 import { presets } from '../data/presets'
 
 export const setupWizard = async (): Promise<void> => {
-  const setupFiles = await findConfigFiles()
-  const configFile = setupFiles.configFile
-  const publish = presets[setupFiles.publish].publish
-
   try {
+    const setupFiles = await findConfigFiles()
+    const configFile = setupFiles.configFile
+    const publish = presets[setupFiles.publish].publish
+
     const shouldPublish = await askAutomaticPublish()
     const shouldPush = await askAutomaticPush()
+
+    console.log(publish)
 
     const success = storePublishConfig(
       configFile,
