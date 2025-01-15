@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/versify",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {
@@ -19,7 +19,8 @@
     "preinstall": "tsc"
   },
   "bin": {
-    "versify": "bin/versify"
+    "versify": "bin/versify",
+    "autover": "bin/versify"
   },
   "keywords": [
     "cli",
