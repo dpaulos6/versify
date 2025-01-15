@@ -1,11 +1,11 @@
 export type Preset = {
-  publish: {
-    name: string
-    command: string
-    options: string[]
-  }
+  name: string
+  command: string
+  options: string[]
 }
 
 export type PresetsConfig = {
-  [key: string]: Preset
+  [key: string]: {
+    publish: Preset
+  }
 }
