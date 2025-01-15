@@ -1,7 +1,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { write } from './log'
-import type { Config } from '../types/config'
+import { write } from '@/utils/log'
+import type { Config } from '@/types/config'
 
 const configFilePath = path.join(__dirname, '..', './config.json')
 

@@ -2,10 +2,11 @@ import fs from 'node:fs'
 import simpleGit, { type SimpleGit } from 'simple-git'
 import semver from 'semver'
 import { exec } from 'node:child_process'
-import { write } from './utils/log'
+import { write } from '@/utils/log'
 import inquirer from 'inquirer'
 import ora from 'ora'
-import { getConfig, saveConfig } from './utils/file'
+import { getConfig, saveConfig } from '@/utils/file'
+import { presets } from '@/data/presets'
 
 const git: SimpleGit = simpleGit()
 
@@ -73,25 +74,32 @@ const askPublishLocation = async (): Promise<string> => {
 }
 
 const storePublishConfig = (
-  isPackage?: boolean,
-  publishTo?: string,
-  shouldPush?: boolean,
-  shouldPublish?: boolean
-): void => {
+  isPackage: boolean,
+  publishTo: string,
+  shouldPush: boolean,
+  shouldPublish: boolean
+): boolean => {
   const config = getConfig()
   if (config === undefined) {
-    return
+    return false
   }
 
   config.isPackage = isPackage ?? config.isPackage
   config.shouldPush = shouldPush ?? config.shouldPush
   config.shouldPublish = shouldPublish ?? config.shouldPublish
+
+  const publishConfig = presets[publishTo]
+    ? presets[publishTo].publish
+    : config.publish
+
   config.publish = {
-    name: publishTo ?? config.publish.name,
-    command: publishTo === 'npm' ? 'npm publish' : 'jsr publish',
-    options: publishTo === 'npm' ? ['--otp'] : []
+    name: publishConfig.name,
+    command: publishConfig.command,
+    options: publishConfig.options
   }
+
   saveConfig(config)
+  return true
 }
 
 /**
@@ -253,18 +261,48 @@ export const automateVersioning = async (
   process.exit(1)
 }
 
-const ensureConfig = async (): Promise<void> => {
-  const config = getConfig()
-  if (
-    config !== undefined &&
-    (!config.isPackage || !config.shouldPush || !config.shouldPublish)
-  ) {
+export const setupWizard = async (): Promise<void> => {
+  try {
     const isPackage = await askProjectType()
     const publishTo = isPackage ? await askPublishLocation() : ''
     const shouldPublish = isPackage ? await askAutomaticPublish() : false
     const shouldPush = await askAutomaticPush()
 
-    storePublishConfig(isPackage, publishTo, shouldPush, shouldPublish)
+    const success = storePublishConfig(
+      isPackage,
+      publishTo,
+      shouldPush,
+      shouldPublish
+    )
+
+    if (success) {
+      write({
+        message: 'Setup completed successfully.',
+        variant: 'success'
+      })
+    } else {
+      write({
+        message: 'Setup failed. Please try again.',
+        variant: 'error'
+      })
+    }
+  } catch (error: unknown) {
+    write({
+      message: `Setup encountered an error: ${error instanceof Error ? error.message : String(error)}`,
+      variant: 'error'
+    })
+  }
+}
+
+const ensureConfig = async (): Promise<void> => {
+  const config = getConfig()
+  if (
+    config === undefined ||
+    !config.isPackage ||
+    !config.shouldPush ||
+    !config.shouldPublish
+  ) {
+    await setupWizard()
   }
 }
 

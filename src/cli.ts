@@ -1,7 +1,7 @@
 import { program } from 'commander'
-import { automateVersioning } from './index'
-import {} from './utils/file' // Import file utility functions
-import { write } from './utils/log'
+import { automateVersioning, setupWizard } from '@/index'
+import {} from '@/utils/file'
+import { write } from '@/utils/log'
 
 program.name('autover').usage('<command> [options]').version('2.0.0')
 
@@ -23,6 +23,13 @@ program
       message: `Bumped version to ${newVersion}\n`,
       variant: 'success'
     })
+  })
+
+program
+  .command('setup')
+  .description('Runs the setup wizard')
+  .action(async () => {
+    await setupWizard()
   })
 
 program.parse(process.argv)
