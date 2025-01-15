@@ -7,6 +7,11 @@ export type Config = {
     command: string
     options?: string[]
   }
+  useGitCredentials: boolean
+  gitCredentials?: {
+    username: string
+    password: string
+  }
 }
 
 export const defaultConfig = {
@@ -17,5 +22,10 @@ export const defaultConfig = {
     name: 'npm',
     command: 'npm publish',
     options: ['--otp']
+  },
+  useGitCredentials: false,
+  gitCredentials: {
+    username: '',
+    password: ''
   }
 }

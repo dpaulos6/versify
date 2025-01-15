@@ -7,6 +7,7 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import { getConfig, saveConfig } from './utils/file'
 import { presets } from './data/presets'
+import { defaultConfig } from './types/config'
 
 const git: SimpleGit = simpleGit()
 
@@ -73,35 +74,65 @@ const askPublishLocation = async (): Promise<string> => {
   return publishTo
 }
 
+export const askGitCredentials = async (): Promise<{
+  storeCredentials: boolean
+  username?: string
+  password?: string
+}> => {
+  const { storeCredentials } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'storeCredentials',
+      message: 'Do you want to store your Git credentials?',
+      default: false
+    }
+  ])
+
+  if (!storeCredentials) {
+    return { storeCredentials }
+  }
+
+  const answers = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'username',
+      message: 'Enter your Git username:'
+    },
+    {
+      type: 'password',
+      name: 'password',
+      message: 'Enter your Git password:'
+    }
+  ])
+  return { storeCredentials, ...answers }
+}
+
 export const storePublishConfig = (
   isPackage: boolean,
   publishTo: string,
   shouldPush: boolean,
-  shouldPublish: boolean
+  shouldPublish: boolean,
+  useGitCredentials: boolean,
+  gitCredentials?: { username: string; password: string }
 ): boolean => {
-  const config = getConfig() || {
-    isPackage: false,
-    shouldPush: false,
-    shouldPublish: false,
-    publish: {
-      name: '',
-      command: '',
-      options: []
-    }
-  }
+  const config = getConfig() || defaultConfig
 
   config.isPackage = isPackage
   config.shouldPush = shouldPush
   config.shouldPublish = shouldPublish
+  config.useGitCredentials = useGitCredentials
+  if (useGitCredentials && gitCredentials) {
+    config.gitCredentials = gitCredentials
+  }
 
   const publishConfig = presets[publishTo]
     ? presets[publishTo].publish
     : config.publish
 
   config.publish = {
-    name: publishTo ? publishConfig.name : '',
-    command: publishTo ? publishConfig.command : '',
-    options: publishTo ? publishConfig.options : []
+    name: publishTo,
+    command: publishConfig.command,
+    options: publishConfig.options ?? []
   }
 
   try {
@@ -109,9 +140,7 @@ export const storePublishConfig = (
     return true
   } catch (error: unknown) {
     write({
-      message: `Error: ${error instanceof Error ? error.message : String(error)}\nStack: ${
-        error instanceof Error ? error.stack : 'N/A'
-      }`,
+      message: `Error: ${error instanceof Error ? error.message : String(error)}\n`,
       variant: 'error'
     })
     return false
@@ -123,6 +152,20 @@ export const storePublishConfig = (
  * @returns {Promise<void>} A promise that resolves when the push is complete.
  */
 const pushChanges = async (): Promise<void> => {
+  const config = getConfig()
+  if (!config) {
+    write({
+      message: 'Configuration not found. Please run the setup wizard.',
+      variant: 'error'
+    })
+    process.exit(1)
+  }
+
+  if (config.useGitCredentials && config.gitCredentials) {
+    await git.addConfig('user.name', config.gitCredentials.username)
+    await git.addConfig('user.password', config.gitCredentials.password)
+  }
+
   const spinnerChanges = ora('Pushing changes to remote repository...').start()
   try {
     await git.push('origin', 'main')
@@ -284,12 +327,17 @@ export const setupWizard = async (): Promise<void> => {
     const publishTo = isPackage ? await askPublishLocation() : ''
     const shouldPublish = isPackage ? await askAutomaticPublish() : false
     const shouldPush = await askAutomaticPush()
+    const { storeCredentials, username, password } = await askGitCredentials()
+    const gitCredentials =
+      username && password ? { username, password } : undefined
 
     const success = storePublishConfig(
       isPackage,
       publishTo,
       shouldPush,
-      shouldPublish
+      shouldPublish,
+      storeCredentials,
+      storeCredentials ? gitCredentials : undefined
     )
 
     if (success) {
