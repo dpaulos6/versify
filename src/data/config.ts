@@ -1,7 +1,7 @@
 import type { Config } from '../types/config'
 
 export const defaultConfig: Config = {
-  isPackage: false,
+  configFile: 'package.json',
   shouldPush: false,
   shouldPublish: false,
   publish: {
