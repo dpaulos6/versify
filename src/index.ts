@@ -256,7 +256,7 @@ export const automateVersioning = async (
   if (config !== undefined) {
     const { isPackage, shouldPush, shouldPublish } = config
 
-    const spinner = ora('Automating versioning...\n').start()
+    const spinner = ora('Automating versioning...').start()
 
     const newVersion = bumpVersion(bumpType)
     updateVersionInPackageJson(newVersion)
