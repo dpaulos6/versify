@@ -8,7 +8,15 @@ import { write } from '../utils/log'
  * @returns {string} The current version.
  */
 export const getCurrentVersion = (): string => {
-  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+  const config = getConfig()
+  if (config === undefined || config.configFile === undefined) {
+    write({
+      message: 'No config file found',
+      variant: 'error'
+    })
+    return '0.0.0'
+  }
+  const packageJson = JSON.parse(fs.readFileSync(config.configFile, 'utf8'))
   return packageJson.version
 }
 
