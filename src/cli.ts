@@ -8,7 +8,8 @@ program.name('autover').usage('<command> [options]').version('2.0.0')
 program
   .command('bump <type>')
   .description('Bump the version (major, minor, patch)')
-  .action(async (type: 'major' | 'minor' | 'patch') => {
+  .option('-d, --default', 'Use default preferences')
+  .action(async (type: 'major' | 'minor' | 'patch', options) => {
     if (!['major', 'minor', 'patch'].includes(type)) {
       write({
         message: 'Invalid version type. Please use major, minor, or patch.',
@@ -17,7 +18,7 @@ program
       process.exit(1)
     }
 
-    const newVersion = await automateVersioning(type)
+    const newVersion = await automateVersioning(type, options)
 
     write({
       message: `Bumped version to ${newVersion}\n`,

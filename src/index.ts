@@ -6,8 +6,9 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import { getConfig, saveConfig } from './utils/file'
 import { exec } from 'node:child_process'
-import { defaultConfig } from './types/config'
+import { defaultConfig } from './data/config'
 import { presets } from './data/presets'
+import type { Config } from './types/config'
 
 const git: SimpleGit = simpleGit()
 
@@ -248,10 +249,18 @@ const publishPackage = (command: string): Promise<void> => {
  * @returns {Promise<string>} A promise that resolves to the new version.
  */
 export const automateVersioning = async (
-  bumpType: 'major' | 'minor' | 'patch'
+  bumpType: 'major' | 'minor' | 'patch',
+  options: { default: boolean }
 ): Promise<string> => {
-  await ensureConfig()
-  const config = getConfig()
+  let config: Config | undefined
+
+  if (options.default) {
+    config = defaultConfig
+  } else {
+    await ensureConfig()
+    config = getConfig()
+  }
+
   if (config !== undefined) {
     const { isPackage, shouldPush, shouldPublish } = config
 
@@ -274,6 +283,7 @@ export const automateVersioning = async (
 
     return newVersion
   }
+
   process.exit(1)
 }
 

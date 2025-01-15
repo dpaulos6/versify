@@ -4,7 +4,7 @@ A Command Line Interface (CLI) tool for automating version bumps, Git tagging, a
 
 ## Warning
 
-JSR is still a work in progress, it will not work if you try to use JSR.
+JSR is still a work in progress, it might not work as expected.
 
 ## Installation
 
@@ -97,35 +97,33 @@ The configuration will be saved in a `config.json` file in your project director
 
 ### Example Configuration File
 
-The base configuration from `file.ts` is as follows:
+The base configuration is as follows:
 
 ```json
 {
-  "publishConfig": {
-    "isPackage": true,
-    "publishTo": "npm",
-    "shouldPush": true,
-    "shouldPublish": true,
-    "commands": {
-      "npm": {
-        "publish": "npm publish",
-        "options": ["--otp"]
-      },
-      "jsr": {
-        "publish": "jsr publish",
-        "options": ["--username", "--password"]
-      }
-    }
+  "isPackage": false,
+  "shouldPush": false,
+  "shouldPublish": false,
+  "publish": {
+    "name": "npm",
+    "command": "npm publish",
+    "options": ["--otp"]
   }
 }
 ```
 
+If you want to use default configuration even if you already setup your configuration file, do so by running:
+
+```bash
+autover bump minor -d # use flag -d or --default to ignore your saved configuration and use defaults
+```
+
 ### Package Publishing Commands
 
-The tool supports publishing to npm and jsr with the following commands:
+The tool supports publishing to npm and jsr:
 
-- [`npm publish`](command:_github.copilot.openSymbolFromReferences?%5B%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22c%3A%5C%5Ccoding%5C%5Cautover%5C%5Csrc%5C%5Cutils%5C%5Cfile.ts%22%2C%22_sep%22%3A1%2C%22external%22%3A%22file%3A%2F%2F%2Fc%253A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22path%22%3A%22%2Fc%3A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22scheme%22%3A%22file%22%7D%2C%7B%22line%22%3A67%2C%22character%22%3A10%7D%5D "src/utils/file.ts") with `--otp` option for One-Time Password (OTP).
-- [`jsr publish`](command:_github.copilot.openSymbolFromReferences?%5B%7B%22%24mid%22%3A1%2C%22fsPath%22%3A%22c%3A%5C%5Ccoding%5C%5Cautover%5C%5Csrc%5C%5Cutils%5C%5Cfile.ts%22%2C%22_sep%22%3A1%2C%22external%22%3A%22file%3A%2F%2F%2Fc%253A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22path%22%3A%22%2Fc%3A%2Fcoding%2Fautover%2Fsrc%2Futils%2Ffile.ts%22%2C%22scheme%22%3A%22file%22%7D%2C%7B%22line%22%3A67%2C%22character%22%3A10%7D%5D "src/utils/file.ts") with `--username` and `--password` options for credentials.
+- `npm` with One-Time Password (OTP) (Will be asked during the version bump process).
+- `jsr` with browser based authentication. (Might not work as expected or even crash due to not being 100% tested yet.)
 
 ## License
 
