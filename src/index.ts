@@ -99,15 +99,36 @@ const storePublishConfig = (
  * @returns {Promise<void>} A promise that resolves when the push is complete.
  */
 const pushChanges = async (): Promise<void> => {
-  const spinner = ora('Pushing changes to remote repository...').start()
-
+  const spinnerChanges = ora('Pushing changes to remote repository...').start()
   try {
-    await git.push('origin', 'main', ['--follow-tags'])
-    spinner.succeed('Pushed changes to remote repository.')
+    await git.push('origin', 'main')
+    spinnerChanges.succeed('Pushed changes to remote repository.')
   } catch (error: unknown) {
-    spinner.fail('Failed to push changes to remote repository.')
+    spinnerChanges.fail('Failed to push changes to remote repository.')
     write({
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Error: ${error instanceof Error ? error.message : String(error)}\nStack: ${
+        error instanceof Error ? error.stack : 'N/A'
+      }`,
+      variant: 'error'
+    })
+    process.exit(1)
+  }
+
+  const spinnerTags = ora('Checking for tags to push...').start()
+  try {
+    const tags = await git.tags()
+    if (tags.all.length > 0) {
+      await git.push('origin', '--tags')
+      spinnerTags.succeed('Pushed tags to remote repository.')
+    } else {
+      spinnerTags.info('No tags to push.')
+    }
+  } catch (error: unknown) {
+    spinnerTags.fail('Failed to push tags to remote repository.')
+    write({
+      message: `Error: ${error instanceof Error ? error.message : String(error)}\nStack: ${
+        error instanceof Error ? error.stack : 'N/A'
+      }`,
       variant: 'error'
     })
     process.exit(1)
