@@ -1,9 +1,9 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type chalk from 'chalk'
-import { info, success, warning, error, text } from '../config/chalk'
+import { info, success, warning, error, text, debug } from '../config/chalk'
 
-type Variant = 'info' | 'success' | 'warning' | 'error'
+type Variant = 'info' | 'success' | 'warning' | 'error' | 'debug'
 
 export const write = ({
   message,
@@ -13,7 +13,8 @@ export const write = ({
     info: info,
     success: success,
     warning: warning,
-    error: error
+    error: error,
+    debug: debug
   }
 
   process.stdout.write(
