@@ -18,7 +18,8 @@ const askOtp = (): Promise<string> => {
         type: 'input',
         name: 'otp',
         message: 'Please enter your OTP (leave blank if not needed):',
-        default: ''
+        default: '',
+        transformer: (input: string) => input,
       }
     ])
     .then((answers) => answers.otp)
