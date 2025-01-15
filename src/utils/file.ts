@@ -1,9 +1,9 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { write } from '@/utils/log'
-import type { Config } from '@/types/config'
+import { write } from './log'
+import type { Config } from '../types/config'
 
-const configFilePath = path.join(__dirname, '..', './config.json')
+const configPath = path.resolve(__dirname, '../config.json')
 
 /**
  * Reads the configuration file and parses it into a JavaScript object.
@@ -11,9 +11,9 @@ const configFilePath = path.join(__dirname, '..', './config.json')
  * @returns {Config | undefined} The parsed configuration object, or undefined if an error occurred.
  */
 export const getConfig = (): Config | undefined => {
-  if (fs.existsSync(configFilePath)) {
+  if (fs.existsSync(configPath)) {
     try {
-      const config = fs.readFileSync(configFilePath, 'utf-8')
+      const config = fs.readFileSync(configPath, 'utf-8')
       return JSON.parse(config)
     } catch (error) {
       write({
@@ -38,11 +38,11 @@ export const getConfig = (): Config | undefined => {
  */
 export const saveConfig = (config: Config): void => {
   try {
-    const directory = path.dirname(configFilePath)
+    const directory = path.dirname(configPath)
     if (!fs.existsSync(directory)) {
       fs.mkdirSync(directory, { recursive: true })
     }
-    fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2))
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
   } catch (error) {
     write({
       message: `Error saving config file: ${error instanceof Error ? error.message : String(error)}`,

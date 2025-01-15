@@ -1,4 +1,4 @@
-import type { PresetsConfig } from '@/types/preset'
+import type { PresetsConfig } from '../types/preset'
 
 export const presets: PresetsConfig = {
   npm: {

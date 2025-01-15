@@ -1,7 +1,7 @@
 import { program } from 'commander'
-import { automateVersioning, setupWizard } from '@/index'
-import {} from '@/utils/file'
-import { write } from '@/utils/log'
+import { automateVersioning, setupWizard } from './'
+import {} from './utils/file'
+import { write } from './utils/log'
 
 program.name('autover').usage('<command> [options]').version('2.0.0')
 

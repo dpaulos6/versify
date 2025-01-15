@@ -2,11 +2,11 @@ import fs from 'node:fs'
 import simpleGit, { type SimpleGit } from 'simple-git'
 import semver from 'semver'
 import { exec } from 'node:child_process'
-import { write } from '@/utils/log'
+import { write } from './utils/log'
 import inquirer from 'inquirer'
 import ora from 'ora'
-import { getConfig, saveConfig } from '@/utils/file'
-import { presets } from '@/data/presets'
+import { getConfig, saveConfig } from './utils/file'
+import { presets } from './data/presets'
 
 const git: SimpleGit = simpleGit()
 
@@ -73,33 +73,49 @@ const askPublishLocation = async (): Promise<string> => {
   return publishTo
 }
 
-const storePublishConfig = (
+export const storePublishConfig = (
   isPackage: boolean,
   publishTo: string,
   shouldPush: boolean,
   shouldPublish: boolean
 ): boolean => {
-  const config = getConfig()
-  if (config === undefined) {
-    return false
+  const config = getConfig() || {
+    isPackage: false,
+    shouldPush: false,
+    shouldPublish: false,
+    publish: {
+      name: '',
+      command: '',
+      options: []
+    }
   }
 
-  config.isPackage = isPackage ?? config.isPackage
-  config.shouldPush = shouldPush ?? config.shouldPush
-  config.shouldPublish = shouldPublish ?? config.shouldPublish
+  config.isPackage = isPackage
+  config.shouldPush = shouldPush
+  config.shouldPublish = shouldPublish
 
   const publishConfig = presets[publishTo]
     ? presets[publishTo].publish
     : config.publish
 
   config.publish = {
-    name: publishConfig.name,
-    command: publishConfig.command,
-    options: publishConfig.options
+    name: publishTo ? publishConfig.name : '',
+    command: publishTo ? publishConfig.command : '',
+    options: publishTo ? publishConfig.options : []
   }
 
-  saveConfig(config)
-  return true
+  try {
+    saveConfig(config)
+    return true
+  } catch (error: unknown) {
+    write({
+      message: `Error: ${error instanceof Error ? error.message : String(error)}\nStack: ${
+        error instanceof Error ? error.stack : 'N/A'
+      }`,
+      variant: 'error'
+    })
+    return false
+  }
 }
 
 /**
