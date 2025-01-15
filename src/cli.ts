@@ -1,7 +1,8 @@
 import { program } from 'commander'
-import { automateVersioning, setupWizard } from './'
+import { automateVersioning } from './'
 import {} from './utils/file'
 import { write } from './utils/log'
+import { setupWizard } from './helpers/setup'
 
 program.name('autover').usage('<command> [options]').version('2.0.0')
 
@@ -30,7 +31,7 @@ program
   .command('setup')
   .description('Runs the setup wizard')
   .action(async () => {
-    await setupWizard()
+    await setupWizard({ bypass: true })
   })
 
 program.parse(process.argv)

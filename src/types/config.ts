@@ -1,5 +1,5 @@
 export type Config = {
-  isPackage: boolean
+  configFile: string
   shouldPush: boolean
   shouldPublish: boolean
   publish: {
