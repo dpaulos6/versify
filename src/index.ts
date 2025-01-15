@@ -8,6 +8,7 @@ import { getConfig, saveConfig } from './utils/file'
 import { exec, spawn } from 'node:child_process'
 import { defaultConfig } from './types/config'
 import { presets } from './data/presets'
+import { spawnAsync } from './helpers/spawn'
 
 const git: SimpleGit = simpleGit()
 
@@ -77,7 +78,7 @@ const askPublishLocation = async (): Promise<string> => {
 export const askGitCredentials = async (): Promise<{
   storeCredentials: boolean
   username?: string
-  password?: string
+  email?: string
 }> => {
   // Ask if the user wants to store credentials
   const { storeCredentials } = await inquirer.prompt([
@@ -93,7 +94,7 @@ export const askGitCredentials = async (): Promise<{
     return { storeCredentials }
   }
 
-  // Prompt for username and password if user wants to store credentials
+  // Prompt for username and email if user wants to store credentials
   const answers = await inquirer.prompt([
     {
       type: 'input',
@@ -101,28 +102,36 @@ export const askGitCredentials = async (): Promise<{
       message: 'Enter your Git username:'
     },
     {
-      type: 'password',
-      name: 'password',
-      message: 'Enter your Git password:'
+      type: 'input',
+      name: 'email',
+      message: 'Enter your Git email:'
     }
   ])
 
   try {
+    // Store credentials using Git Credential Manager
     const gitProcess = spawn('git', ['credential-manager', 'store'])
 
     gitProcess.stdin.write(
-      `protocol=https\nhost=github.com\nusername=${answers.username}\npassword=${answers.password}\n`
+      `protocol=https\nhost=github.com\nusername=${answers.username}\npassword=YOUR_PASSWORD_PLACEHOLDER\n`
     )
     gitProcess.stdin.end()
 
-    gitProcess.on('close', (code) => {
+    // Listen for the completion of the credential manager process
+    gitProcess.on('close', async (code) => {
       if (code === 0) {
-        spawn('git', ['config', '--global', 'user.name', answers.username])
-        spawn('git', [
+        // Set global user config for Git
+        await spawnAsync('git', [
+          'config',
+          '--global',
+          'user.name',
+          answers.username
+        ])
+        await spawnAsync('git', [
           'config',
           '--global',
           'user.email',
-          `${answers.username}@github.com`
+          answers.email
         ])
 
         write({
@@ -152,7 +161,7 @@ export const storePublishConfig = (
   shouldPush: boolean,
   shouldPublish: boolean,
   useGitCredentials: boolean,
-  gitCredentials?: { username: string; password: string }
+  gitCredentials?: { username: string; email: string }
 ): boolean => {
   const config = getConfig() || defaultConfig
 
@@ -198,11 +207,6 @@ const pushChanges = async (): Promise<void> => {
       variant: 'error'
     })
     process.exit(1)
-  }
-
-  if (config.useGitCredentials && config.gitCredentials) {
-    await git.addConfig('user.name', config.gitCredentials.username)
-    await git.addConfig('user.password', config.gitCredentials.password)
   }
 
   const spinnerChanges = ora('Pushing changes to remote repository...').start()
@@ -366,9 +370,8 @@ export const setupWizard = async (): Promise<void> => {
     const publishTo = isPackage ? await askPublishLocation() : ''
     const shouldPublish = isPackage ? await askAutomaticPublish() : false
     const shouldPush = await askAutomaticPush()
-    const { storeCredentials, username, password } = await askGitCredentials()
-    const gitCredentials =
-      username && password ? { username, password } : undefined
+    const { storeCredentials, username, email } = await askGitCredentials()
+    const gitCredentials = username && email ? { username, email } : undefined
 
     const success = storePublishConfig(
       isPackage,
