@@ -7,8 +7,18 @@ A Command Line Interface (CLI) tool for automating version bumps, Git tagging, a
 You can install the tool globally via npm:
 
 ```bash
+npm install @dpaulos6/versify
+```
+
+You can also install it globally:
+
+```bash
 npm install -g @dpaulos6/versify
 ```
+
+### Warning
+
+Using the CLI globally can affect some projects due to possible differences in configuration, such as publish provider (npm, jsr). If you often have different configurations between projects, it's recommended that you install the CLI locally.
 
 ## Usage
 

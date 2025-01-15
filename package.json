@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/versify",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {
