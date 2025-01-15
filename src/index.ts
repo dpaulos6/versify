@@ -5,10 +5,9 @@ import { write } from './utils/log'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import { getConfig, saveConfig } from './utils/file'
-import { exec, spawn } from 'node:child_process'
+import { exec } from 'node:child_process'
 import { defaultConfig } from './types/config'
 import { presets } from './data/presets'
-import { spawnAsync } from './helpers/spawn'
 
 const git: SimpleGit = simpleGit()
 
@@ -75,103 +74,17 @@ const askPublishLocation = async (): Promise<string> => {
   return publishTo
 }
 
-export const askGitCredentials = async (): Promise<{
-  storeCredentials: boolean
-  username?: string
-  email?: string
-}> => {
-  // Ask if the user wants to store credentials
-  const { storeCredentials } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'storeCredentials',
-      message: 'Do you want to store your Git credentials?',
-      default: false
-    }
-  ])
-
-  if (!storeCredentials) {
-    return { storeCredentials }
-  }
-
-  // Prompt for username and email if user wants to store credentials
-  const answers = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'username',
-      message: 'Enter your Git username:'
-    },
-    {
-      type: 'input',
-      name: 'email',
-      message: 'Enter your Git email:'
-    }
-  ])
-
-  try {
-    // Store credentials using Git Credential Manager
-    const gitProcess = spawn('git', ['credential-manager', 'store'])
-
-    gitProcess.stdin.write(
-      `protocol=https\nhost=github.com\nusername=${answers.username}\npassword=YOUR_PASSWORD_PLACEHOLDER\n`
-    )
-    gitProcess.stdin.end()
-
-    // Listen for the completion of the credential manager process
-    gitProcess.on('close', async (code) => {
-      if (code === 0) {
-        // Set global user config for Git
-        await spawnAsync('git', [
-          'config',
-          '--global',
-          'user.name',
-          answers.username
-        ])
-        await spawnAsync('git', [
-          'config',
-          '--global',
-          'user.email',
-          answers.email
-        ])
-
-        write({
-          message: 'Stored credentials successfully.',
-          variant: 'success'
-        })
-      } else {
-        write({
-          message: 'Failed to store credentials.',
-          variant: 'error'
-        })
-      }
-    })
-  } catch (error) {
-    write({
-      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
-      variant: 'error'
-    })
-  }
-
-  return { storeCredentials, ...answers }
-}
-
 export const storePublishConfig = (
   isPackage: boolean,
   publishTo: string,
   shouldPush: boolean,
-  shouldPublish: boolean,
-  useGitCredentials: boolean,
-  gitCredentials?: { username: string; email: string }
+  shouldPublish: boolean
 ): boolean => {
   const config = getConfig() || defaultConfig
 
   config.isPackage = isPackage
   config.shouldPush = shouldPush
   config.shouldPublish = shouldPublish
-  config.useGitCredentials = useGitCredentials
-  if (useGitCredentials && gitCredentials) {
-    config.gitCredentials = gitCredentials
-  }
 
   const publishConfig = presets[publishTo]
     ? presets[publishTo].publish
@@ -370,16 +283,12 @@ export const setupWizard = async (): Promise<void> => {
     const publishTo = isPackage ? await askPublishLocation() : ''
     const shouldPublish = isPackage ? await askAutomaticPublish() : false
     const shouldPush = await askAutomaticPush()
-    const { storeCredentials, username, email } = await askGitCredentials()
-    const gitCredentials = username && email ? { username, email } : undefined
 
     const success = storePublishConfig(
       isPackage,
       publishTo,
       shouldPush,
-      shouldPublish,
-      storeCredentials,
-      storeCredentials ? gitCredentials : undefined
+      shouldPublish
     )
 
     if (success) {

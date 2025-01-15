@@ -10,7 +10,6 @@ export type Config = {
   useGitCredentials: boolean
   gitCredentials?: {
     username: string
-    email: string
   }
 }
 
@@ -25,7 +24,6 @@ export const defaultConfig = {
   },
   useGitCredentials: false,
   gitCredentials: {
-    username: '',
-    email: ''
+    username: ''
   }
 }
