@@ -5,8 +5,10 @@ import { getConfig, saveConfig } from '../utils/file'
 import { write } from '../utils/log'
 
 /**
- * Ensures that the configuration is set up correctly.
- * @returns {Promise<void>} A promise that resolves when the configuration is set up.
+ * Ensures that the configuration is properly initialized.
+ * If the config is missing or incomplete, triggers the setup wizard.
+ *
+ * @returns {Promise<void>} A promise that resolves when the setup completes.
  */
 export const ensureConfig = async (): Promise<void> => {
   const config = getConfig()
@@ -21,12 +23,13 @@ export const ensureConfig = async (): Promise<void> => {
 }
 
 /**
- * Stores the publish configuration in the publish-config.json file.
- * @param {string} projectType - The registry to publish to.
- * @param {boolean} isPackage - Whether the project is a package.
- * @param {boolean} shouldPush - Whether to push changes automatically.
- * @param {boolean} shouldPublish - Whether to publish the package automatically.
- * @returns {boolean} Whether the configuration was saved successfully.
+ * Stores the publish configuration in the selected config file.
+ *
+ * @param {string} configFile - The full path to the configuration file.
+ * @param {boolean} shouldPush - Whether to automatically push after versioning.
+ * @param {boolean} shouldPublish - Whether to automatically publish after versioning.
+ * @param {Preset} publish - The publish provider configuration preset.
+ * @returns {boolean} True if config was saved successfully, false otherwise.
  */
 export const storePublishConfig = (
   configFile: string,

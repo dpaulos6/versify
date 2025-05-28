@@ -1,11 +1,10 @@
 import { program } from 'commander'
 import { automateVersioning } from './'
-import {} from './utils/file'
 import { write } from './utils/log'
 import { setupWizard } from './helpers/setup'
+import { version } from '../package.json'
 
-program.name('versify').usage('<command> [options]').version('2.0.0')
-
+program.name('versify').usage('<command> [options]').version(version)
 program
   .command('bump <type>')
   .description('Bump the version (major, minor, patch)')

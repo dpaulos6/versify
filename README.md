@@ -105,7 +105,7 @@ You can always change the file by running the setup wizard:
 versify setup
 ```
 
-The configuration will be saved in a `config.json` file in your project directory.
+The configuration will be saved in a `versify.json` file in your project directory.
 
 ### Example Configuration File
 

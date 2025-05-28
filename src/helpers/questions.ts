@@ -1,5 +1,10 @@
 import inquirer from 'inquirer'
 
+/**
+ * Prompts the user to enter a one-time password (OTP).
+ *
+ * @returns {Promise<string>} The OTP entered by the user.
+ */
 export const askOtp = async (): Promise<string> => {
   const { otp } = await inquirer.prompt([
     {
@@ -12,6 +17,11 @@ export const askOtp = async (): Promise<string> => {
   return otp
 }
 
+/**
+ * Asks the user if the project is a package that needs to be published.
+ *
+ * @returns {Promise<boolean>} True if it's a package, false otherwise.
+ */
 export const askIsPackage = async (): Promise<boolean> => {
   const { isPackage } = await inquirer.prompt([
     {
@@ -24,6 +34,11 @@ export const askIsPackage = async (): Promise<boolean> => {
   return isPackage
 }
 
+/**
+ * Asks the user whether they want to automatically push changes after versioning.
+ *
+ * @returns {Promise<boolean>} True if auto-push is enabled, false otherwise.
+ */
 export const askAutomaticPush = async (): Promise<boolean> => {
   const { shouldPush } = await inquirer.prompt([
     {
@@ -36,6 +51,11 @@ export const askAutomaticPush = async (): Promise<boolean> => {
   return shouldPush
 }
 
+/**
+ * Asks the user whether they want to automatically publish after versioning.
+ *
+ * @returns {Promise<boolean>} True if auto-publish is enabled, false otherwise.
+ */
 export const askAutomaticPublish = async (): Promise<boolean> => {
   const { shouldPublish } = await inquirer.prompt([
     {

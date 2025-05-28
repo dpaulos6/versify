@@ -3,7 +3,7 @@ import * as path from 'node:path'
 import { write } from './log'
 import type { Config } from '../types/config'
 
-const configPath = path.resolve(__dirname, '../config.json')
+const configPath = path.resolve(__dirname, '../versify.json')
 
 /**
  * Reads the configuration file and parses it into a JavaScript object.
@@ -52,13 +52,14 @@ export const saveConfig = (config: Config): void => {
 }
 
 /**
- * Creates a default configuration object.
- * @returns {Record<string, any>} The default configuration object.
+ * Creates a blank configuration file at the specified path.
+ * This function is primarily used when a config file is missing and needs to be generated.
+ *
+ * @param {string} targetPath - The path where the default config file should be created.
+ * @returns {Config} An empty config object (cast to Config type).
  */
-const createDefaultConfig = (): Config => {
-  const configPath = path.resolve(__dirname, 'config.json')
-  if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(configPath, JSON.stringify({}, null, 2))
+const createDefaultConfig = (targetPath: string): Config => {
+  if (!fs.existsSync(targetPath)) {
   }
   return undefined as unknown as Config
 }

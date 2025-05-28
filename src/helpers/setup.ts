@@ -4,6 +4,14 @@ import { askAutomaticPublish, askAutomaticPush } from '../helpers/questions'
 import { findConfigFiles } from '../helpers/files'
 import { presets } from '../data/presets'
 
+/**
+ * Interactive setup wizard to initialize config and preferences.
+ * Guides the user through questions and saves the result to a config file.
+ *
+ * @param {Object} options - Setup options.
+ * @param {boolean} [options.bypass] - If true, bypasses existing config and forces full setup.
+ * @returns {Promise<void>} A promise that resolves when setup is completed or fails.
+ */
 export const setupWizard = async ({
   bypass
 }: { bypass?: boolean }): Promise<void> => {

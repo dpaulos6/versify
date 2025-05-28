@@ -5,7 +5,7 @@ import { exec } from 'node:child_process'
 import { write } from '../utils/log'
 
 /**
- * Publishes the package to the registry using the configuration from the publish-config.json.
+ * Publishes the package to the registry using the configuration from the config file.
  * @param {string} command - The command to execute for publishing.
  * @returns {Promise<void>} A promise that resolves when the package has been successfully published, or rejects if an error occurs during the process.
  */

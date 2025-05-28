@@ -1,6 +1,6 @@
 {
   "name": "@dpaulos6/versify",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "A CLI tool for automating version bumps",
   "main": "index.js",
   "repository": {
@@ -20,6 +20,7 @@
   },
   "bin": {
     "versify": "bin/versify",
+    "version": "bin/versify",
     "autover": "bin/versify"
   },
   "keywords": [
@@ -34,9 +35,7 @@
   ],
   "author": "dpaulos6",
   "license": "MIT",
-  "contributors": [
-    "dpaulos6"
-  ],
+  "contributors": ["dpaulos6"],
   "dependencies": {
     "@types/node": "^22.10.5",
     "@types/semver": "^7.5.8",
@@ -53,5 +52,6 @@
     "@types/commander": "^2.12.5",
     "@types/inquirer": "^9.0.7",
     "ultracite": "4.1.15"
-  }
+  },
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }
